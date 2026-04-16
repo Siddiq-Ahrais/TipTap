@@ -22,6 +22,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'divisi',
+        'status_pekerjaan',
+        'tgl_habis_kontrak',
+        'is_approved',
     ];
 
     /**
@@ -44,6 +49,24 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_approved' => 'boolean',
+            'tgl_habis_kontrak' => 'date',
         ];
+    }
+
+    /**
+     * Get all attendances for the user.
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Get all leaves for the user.
+     */
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class);
     }
 }

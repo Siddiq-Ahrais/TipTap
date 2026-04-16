@@ -30,6 +30,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'user',
+            'divisi' => fake()->randomElement(['IT', 'HR', 'Finance', 'Marketing', 'Operations']),
+            'status_pekerjaan' => 'aktif',
+            'tgl_habis_kontrak' => fake()->dateTimeBetween('+1 month', '+2 years')->format('Y-m-d'),
+            'is_approved' => false,
         ];
     }
 

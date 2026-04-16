@@ -18,6 +18,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->string('role')->default('user'); // superadmin, admin, user
+            $table->string('divisi')->nullable();
+            $table->string('status_pekerjaan')->nullable(); // aktif, cuti, resign
+            $table->date('tgl_habis_kontrak')->nullable();
+            $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
 
