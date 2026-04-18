@@ -91,4 +91,74 @@ class LeaveController extends Controller
             'data' => $history,
         ]);
     }
+
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        // Sort by date descending and allow filtering by status
+        $query = Leave::query()->where('user_id', $user->id);
+
+        if ($request->filled('status')) {
+            $query->where('status_approval', $request->status);
+        }
+
+        $history = $query->orderByDesc('created_at')->paginate(10);
+
+        return view('leave.index', compact('history'));
+    }
+
+    public function create()
+    {
+        return view('leave.create');
+    }
+
+    public function store(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'jenis_izin' => ['required', 'string', Rule::in(['Sakit', 'Cuti Tahunan', 'Keperluan Mendadak'])],
+                'tanggal_mulai' => ['required', 'date'],
+                'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
+                'alasan' => ['required', 'string'],
+                'bukti_file' => ['required_if:jenis_izin,Sakit', 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB limit
+            ],
+            [
+                'jenis_izin.in' => 'Leave type must be one of: Sakit, Cuti Tahunan, Keperluan Mendadak.',
+                'tanggal_selesai.after_or_equal' => 'The end date must be greater than or equal to the start date.',
+                'bukti_file.required_if' => 'Supporting document is required when sick (Sakit).',
+                'bukti_file.max' => 'The file size must not exceed 5MB.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $validated = $validator->validated();
+        $storedPath = null;
+
+        if ($request->hasFile('bukti_file')) {
+            $file = $request->file('bukti_file');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filename = sprintf('user_%d_leave_%d.%s', $user->id, now()->timestamp, $extension);
+
+            $storedPath = Storage::disk('public')->putFileAs('leave_documents', $file, $filename);
+        }
+
+        Leave::create([
+            'user_id' => $user->id,
+            'jenis_izin' => $validated['jenis_izin'],
+            'tanggal_mulai' => $validated['tanggal_mulai'],
+            'tanggal_selesai' => $validated['tanggal_selesai'],
+            'alasan' => $validated['alasan'],
+            'bukti_file' => $storedPath,
+            'status_approval' => 'Pending',
+        ]);
+
+        return redirect()->route('leaves.index')->with('success', 'Leave application submitted successfully.');
+    }
 }
