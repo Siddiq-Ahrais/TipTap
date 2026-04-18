@@ -7,7 +7,7 @@
     <title>About</title>
 </head>
 <body>
-    <h1>Home</h1>
+    <h1>about</h1>
     <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maiores cumque repudiandae voluptas. Id officiis voluptates perspiciatis nemo doloribus! Cum, quae provident? Cumque quas esse inventore excepturi? Aliquid incidunt expedita quidem?</p>
     <a href="/about">About</a>
 

@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'company_email_domain' => env('COMPANY_EMAIL_DOMAIN', 'company.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
