@@ -15,7 +15,7 @@ class Setting extends Model
     ];
 
     protected $casts = [
-        'jam_masuk_kantor' => 'time',
-        'jam_mulai_pulang' => 'time',
+        'jam_masuk_kantor' => 'string',
+        'jam_mulai_pulang' => 'string',
     ];
 }
