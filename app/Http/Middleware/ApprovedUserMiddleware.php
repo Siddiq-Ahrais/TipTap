@@ -14,9 +14,13 @@ class ApprovedUserMiddleware
         $user = $request->user();
 
         if (! $user) {
-            return response()->json([
-                'message' => 'Unauthenticated.',
-            ], 401);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Unauthenticated.',
+                ], 401);
+            }
+
+            return redirect()->route('login');
         }
 
         if (! $user->is_approved) {
@@ -25,9 +29,15 @@ class ApprovedUserMiddleware
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return response()->json([
-                'message' => 'Account pending Admin approval.',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Account pending Admin approval.',
+                ], 403);
+            }
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Account pending Admin approval.',
+            ]);
         }
 
         return $next($request);
