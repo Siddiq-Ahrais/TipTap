@@ -5,20 +5,13 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
-<<<<<<< HEAD
-=======
 use App\Http\Controllers\Auth\PasswordController;
->>>>>>> refs/remotes/origin/main
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-<<<<<<< HEAD
 Route::middleware('guest')->group(function (): void {
-=======
-Route::middleware('guest')->group(function () {
->>>>>>> refs/remotes/origin/main
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -42,11 +35,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
-<<<<<<< HEAD
 Route::middleware('auth')->group(function (): void {
-=======
-Route::middleware('auth')->group(function () {
->>>>>>> refs/remotes/origin/main
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
@@ -63,12 +52,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-<<<<<<< HEAD
-    Route::put('password', [App\Http\Controllers\Auth\PasswordController::class, 'update'])
-        ->name('password.update');
-=======
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
->>>>>>> refs/remotes/origin/main
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

@@ -13,17 +13,7 @@ class ApprovedUserMiddleware
     {
         $user = $request->user();
 
-        if (! $user) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Unauthenticated.',
-                ], 401);
-            }
-
-            return redirect()->route('login');
-        }
-
-        if (! $user->is_approved) {
+        if (! $user?->is_approved) {
             Auth::guard('web')->logout();
 
             $request->session()->invalidate();
