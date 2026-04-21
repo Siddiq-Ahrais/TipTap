@@ -10,7 +10,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="text-slate-900 antialiased">
+    <body class="bg-slate-50 text-dark-slate antialiased">
         @php
             $sidebarItems = [
                 ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
@@ -21,14 +21,13 @@
         @endphp
 
         <div class="relative min-h-screen overflow-x-clip">
-            <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[30rem] bg-[radial-gradient(circle_at_8%_0%,rgba(56,189,248,0.24),transparent_42%),radial-gradient(circle_at_90%_0%,rgba(37,99,235,0.2),transparent_40%)]"></div>
 
             @include('layouts.navigation')
 
             <div class="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-6 px-4 pb-8 pt-6 sm:px-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:px-8">
                 <aside class="hidden lg:block">
                     <div class="card-soft sticky top-24 rounded-3xl p-4">
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Workspace</p>
+                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.18em] text-navy-primary/70">Workspace</p>
 
                         <nav class="mt-3 space-y-1.5">
                             @foreach ($sidebarItems as $item)
@@ -63,7 +62,7 @@
                         @endif
                     </main>
 
-                    <footer class="rounded-2xl border border-white/50 bg-white/60 px-4 py-3 text-xs text-slate-500 backdrop-blur-sm sm:text-sm">
+                    <footer class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-dark-slate/75 sm:text-sm">
                         <p>&copy; {{ now()->year }} {{ config('app.name', 'TipTap') }}. Built for responsive employee workflows.</p>
                     </footer>
                 </section>

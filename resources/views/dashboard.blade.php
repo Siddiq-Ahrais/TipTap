@@ -13,11 +13,15 @@
         $statusAliases = [
             'checked_in' => 'checked_in',
             'hadir' => 'checked_in',
-            'terlambat' => 'checked_in',
-            'late' => 'checked_in',
+            'terlambat' => 'late',
+            'late' => 'late',
             'checked_out' => 'checked_out',
             'clocked_out' => 'checked_out',
             'absent' => 'absent',
+            'pending' => 'pending',
+            'on_leave' => 'pending',
+            'izin' => 'pending',
+            'sakit' => 'pending',
             'not_yet_clocked_in' => 'not_yet_clocked_in',
             'not_clocked_in' => 'not_yet_clocked_in',
         ];
@@ -30,10 +34,20 @@
                 'tone' => 'emerald',
                 'description' => 'You are currently clocked in. Use clock out when your shift ends.',
             ],
+            'late' => [
+                'label' => 'Late',
+                'tone' => 'rose',
+                'description' => 'You checked in late today. Please keep your team informed.',
+            ],
             'checked_out' => [
                 'label' => 'Checked Out',
                 'tone' => 'slate',
                 'description' => 'Attendance is complete for today. Great job wrapping up on time.',
+            ],
+            'pending' => [
+                'label' => 'Pending',
+                'tone' => 'amber',
+                'description' => 'Your attendance is pending or currently marked as leave for review.',
             ],
             'absent' => [
                 'label' => 'Absent',
@@ -50,7 +64,7 @@
         $todayMeta = $statusMeta[$statusKey];
 
         $canClockIn = in_array($statusKey, ['not_yet_clocked_in', 'absent'], true);
-        $canClockOut = $statusKey === 'checked_in';
+        $canClockOut = in_array($statusKey, ['checked_in', 'late'], true);
 
         $metricCards = $metrics ?? [
             [
@@ -95,8 +109,8 @@
     <x-slot name="header">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Employee Dashboard</p>
-                <h2 class="mt-1 font-display text-2xl font-semibold text-slate-900 sm:text-3xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-navy-primary/70">Employee Dashboard</p>
+                <h2 class="mt-1 font-display text-2xl font-semibold text-navy-primary sm:text-3xl">
                     {{ __('Welcome back, :name', ['name' => $employeeName]) }}
                 </h2>
             </div>
@@ -112,13 +126,13 @@
                         @if ($employeeAvatar)
                             <img src="{{ $employeeAvatar }}" alt="{{ $employeeName }}" class="h-16 w-16 rounded-2xl object-cover ring-4 ring-white/80">
                         @else
-                            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-blue-700 text-2xl font-semibold text-white ring-4 ring-white/80">
+                            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-navy-primary text-2xl font-semibold text-white ring-4 ring-white/80">
                                 {{ strtoupper(substr($employeeName, 0, 1)) }}
                             </div>
                         @endif
 
                         <div>
-                            <h3 class="font-display text-2xl font-semibold text-slate-900">{{ $employeeName }}</h3>
+                            <h3 class="font-display text-2xl font-semibold text-navy-primary">{{ $employeeName }}</h3>
                             <p class="text-sm text-slate-500">{{ $employeeRole }} &middot; {{ $employeeDepartment }}</p>
                         </div>
                     </div>
@@ -153,7 +167,7 @@
                             <button
                                 type="submit"
                                 :disabled="loading"
-                                class="inline-flex w-full items-center justify-center rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+                                class="inline-flex w-full items-center justify-center rounded-2xl bg-teal-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-[#0e8f71] focus:outline-none focus:ring-2 focus:ring-teal-primary/35 focus:ring-offset-2"
                             >
                                 <span x-show="!loading">Clock In</span>
                                 <span x-cloak x-show="loading" class="inline-flex items-center gap-2">
@@ -172,7 +186,7 @@
                             <button
                                 type="submit"
                                 :disabled="loading"
-                                class="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2"
+                                class="inline-flex w-full items-center justify-center rounded-2xl bg-navy-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-[#083a6a] focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2"
                             >
                                 <span x-show="!loading">Clock Out</span>
                                 <span x-cloak x-show="loading" class="inline-flex items-center gap-2">
@@ -210,11 +224,11 @@
         <section class="card-soft rounded-3xl p-6 sm:p-7">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-slate-900">Recent Attendance Activity</h3>
+                    <h3 class="font-display text-xl font-semibold text-navy-primary">Recent Attendance Activity</h3>
                     <p class="text-sm text-slate-500">Latest records from your attendance timeline.</p>
                 </div>
 
-                <a href="{{ route('leaves.index') }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 transition hover:border-blue-200 hover:text-blue-700">
+                <a href="{{ route('leaves.index') }}" class="inline-flex items-center rounded-xl border border-navy-primary/30 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-navy-primary transition hover:bg-navy-primary/5">
                     View Leave History
                 </a>
             </div>
@@ -265,7 +279,7 @@
         <div class="grid gap-4 md:grid-cols-2">
             @foreach ($quickActions as $action)
                 @if (Route::has($action['route']))
-                    <a href="{{ route($action['route']) }}" class="card-soft rounded-3xl p-5 transition hover:-translate-y-0.5 hover:border-blue-200">
+                    <a href="{{ route($action['route']) }}" class="card-soft rounded-3xl p-5 transition-all duration-200 hover:-translate-y-1 hover:opacity-95 hover:shadow-lg hover:shadow-slate-200/70">
                         <p class="font-display text-lg font-semibold text-slate-900">{{ $action['label'] }}</p>
                         <p class="mt-2 text-sm text-slate-600">{{ $action['description'] }}</p>
                     </a>
