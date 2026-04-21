@@ -1,3 +1,5 @@
+@props(['variant' => 'default'])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -7,28 +9,37 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900 antialiased">
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
+            <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800">TipTap</a>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <nav class="flex items-center gap-4 sm:gap-6 text-sm">
+                @if (Route::has('home'))
+                    <a href="{{ route('home') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                @endif
+                @if (Route::has('about'))
+                    <a href="{{ route('about') }}" class="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+                @endif
+                @if (Route::has('login'))
+                    <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Login</a>
+                @endif
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="text-gray-600 hover:text-gray-900 transition-colors">Register</a>
+                @endif
+            </nav>
+        </header>
+
+        <main class="flex-grow flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-grow flex flex-col px-4 sm:px-6 py-6 sm:py-8">
                 @hasSection('content')
                     @yield('content')
                 @else
                     {{ $slot ?? '' }}
                 @endif
             </div>
-        </div>
+        </main>
     </body>
 </html>

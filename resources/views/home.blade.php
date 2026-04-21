@@ -1,22 +1,34 @@
 @extends('layouts.guest')
 
 @section('content')
-    <div class="space-y-4">
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Halaman Home</h1>
-        <p class="text-gray-700 dark:text-gray-300">
-            Selamat datang di TipTap. Halaman ini sekarang memakai Blade layout yang sama dengan Breeze
-            supaya struktur frontend tetap konsisten dan mudah dirawat.
+    <section class="flex-grow flex flex-col items-center justify-center text-center px-4">
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
+            Welcome to TipTap
+        </h1>
+
+        <p class="text-lg text-gray-500 max-w-2xl mb-8">
+            Streamline attendance, leave, and daily updates in one place with a clean and responsive employee portal.
         </p>
 
-        <div class="flex items-center gap-3 text-sm">
-            <a href="{{ route('about') }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">About</a>
-
+        <div class="flex flex-wrap justify-center gap-4">
             @auth
-                <a href="{{ route('dashboard') }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md">
+                    Dashboard
+                </a>
+                <a href="{{ route('about') }}" class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    About
+                </a>
             @else
-                <a href="{{ route('login') }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Login</a>
-                <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Register</a>
+                <a href="{{ route('register') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md">
+                    Register
+                </a>
+                <a href="{{ route('login') }}" class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    Login
+                </a>
+                <a href="{{ route('about') }}" class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    About
+                </a>
             @endauth
         </div>
-    </div>
+    </section>
 @endsection
