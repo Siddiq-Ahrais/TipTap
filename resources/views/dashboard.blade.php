@@ -96,6 +96,9 @@
             $clockInAt = \Illuminate\Support\Carbon::parse((string) $clockInTimeValue);
         }
 
+        $officeCheckIn = old('office_check_in', data_get($globalSettings ?? [], 'office_check_in', data_get($settings ?? [], 'office_check_in', '08:00')));
+        $officeCheckOut = old('office_check_out', data_get($globalSettings ?? [], 'office_check_out', data_get($settings ?? [], 'office_check_out', '17:00')));
+
         $minutesSinceClockIn = $clockInAt ? max(0, $clockInAt->diffInMinutes(now(), false)) : 0;
         $remainingClockOutMinutes = $canAttemptClockOut ? max(0, $clockOutMinimumMinutes - $minutesSinceClockIn) : 0;
         $canClockOut = $canAttemptClockOut && $remainingClockOutMinutes === 0;
@@ -246,8 +249,7 @@
         $selectedMonth = now()->format('m');
         $selectedYear = (string) $currentYear;
 
-        $officeCheckIn = old('office_check_in', data_get($globalSettings ?? [], 'office_check_in', data_get($settings ?? [], 'office_check_in', '08:00')));
-        $officeCheckOut = old('office_check_out', data_get($globalSettings ?? [], 'office_check_out', data_get($settings ?? [], 'office_check_out', '17:00')));
+
     @endphp
 
     <x-slot name="header">

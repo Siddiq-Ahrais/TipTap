@@ -16,7 +16,7 @@
             <h2 class="font-semibold text-xl text-navy-primary leading-tight">
                 {{ __('Leaves') }}
             </h2>
-            <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-[#0B4A85] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] transition-all duration-200 hover:-translate-y-0.5">
+            <a href="{{ route('leaves.create') }}" class="btn-primary-cta mt-4 sm:mt-0 rounded-md px-4 py-2 text-sm font-medium">
                 <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
@@ -57,7 +57,7 @@
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="confirm_early_leave" value="1">
-                            <button type="submit" class="inline-flex items-center rounded-md border border-[#0B4A85] bg-[#0B4A85] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-[#0B4A85] focus:ring-offset-2">
+                            <button type="submit" class="btn-primary-cta rounded-md px-4 py-2 text-sm font-semibold">
                                 Submit Early Clock Out
                             </button>
                         </form>
