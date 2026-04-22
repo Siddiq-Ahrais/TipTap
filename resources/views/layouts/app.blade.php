@@ -12,12 +12,20 @@
     </head>
     <body class="bg-slate-50 text-dark-slate antialiased">
         @php
+            $isAdminNavigation = in_array(strtolower((string) auth()->user()?->role), ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
+
             $sidebarItems = [
                 ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
+                ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation],
                 ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*'],
                 ['label' => __('Posts'), 'route' => 'posts.index', 'active' => 'posts.*'],
                 ['label' => __('Profile'), 'route' => 'profile.edit', 'active' => 'profile.*'],
             ];
+
+            $sidebarItems = array_values(array_filter(
+                $sidebarItems,
+                fn (array $item): bool => ($item['visible'] ?? true) && Route::has($item['route'])
+            ));
         @endphp
 
         <div class="relative min-h-screen overflow-x-clip">
@@ -31,17 +39,15 @@
 
                         <nav class="mt-3 space-y-1.5">
                             @foreach ($sidebarItems as $item)
-                                @if (Route::has($item['route']))
-                                    <a
-                                        href="{{ route($item['route']) }}"
-                                        class="sidebar-link {{ request()->routeIs($item['active']) ? 'sidebar-link-active' : '' }}"
-                                    >
-                                        <span>{{ $item['label'] }}</span>
-                                        <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                @endif
+                                <a
+                                    href="{{ route($item['route']) }}"
+                                    class="sidebar-link {{ request()->routeIs($item['active']) ? 'sidebar-link-active' : '' }}"
+                                >
+                                    <span>{{ $item['label'] }}</span>
+                                    <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
                             @endforeach
                         </nav>
                     </div>

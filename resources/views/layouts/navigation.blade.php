@@ -1,11 +1,17 @@
 @php
+    $isAdminNavigation = in_array(strtolower((string) auth()->user()?->role), ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
+
     $navItems = [
         ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
+        ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation],
         ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*'],
         ['label' => __('Posts'), 'route' => 'posts.index', 'active' => 'posts.*'],
     ];
 
-    $navItems = array_values(array_filter($navItems, fn (array $item): bool => Route::has($item['route'])));
+    $navItems = array_values(array_filter(
+        $navItems,
+        fn (array $item): bool => ($item['visible'] ?? true) && Route::has($item['route'])
+    ));
 @endphp
 
 <nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -27,6 +28,13 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware(['auth', 'approved'])->group(function (): void {
 	Route::post('/clock-in', [AttendanceController::class, 'clockIn'])->middleware('contract.active');
 	Route::put('/clock-out', [AttendanceController::class, 'clockOut'])->middleware('contract.active');
+
+	Route::prefix('approval')->name('approval.')->group(function (): void {
+		Route::get('/', [ApprovalController::class, 'index'])->name('index');
+		Route::patch('/users/{user}/approve', [ApprovalController::class, 'approveUser'])->name('users.approve');
+		Route::delete('/users/{user}/reject', [ApprovalController::class, 'rejectUser'])->name('users.reject');
+		Route::patch('/settings', [ApprovalController::class, 'updateSettings'])->name('settings.update');
+	});
 
 	Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
 	Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
