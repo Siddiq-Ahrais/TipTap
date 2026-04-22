@@ -13,9 +13,8 @@ export default {
         extend: {
             colors: {
                 'navy-primary': '#0B4A85',
-                'teal-primary': '#11A582',
-                'coral-accent': '#FF6B6B',
-                'mustard-caution': '#FBB117',
+                'navy-dark': '#063157',
+                'navy-light': '#E7EFF6',
                 'dark-slate': '#2D3748',
             },
             fontFamily: {

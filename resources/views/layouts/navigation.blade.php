@@ -28,7 +28,7 @@
             @foreach ($navItems as $item)
                 <a
                     href="{{ route($item['route']) }}"
-                    class="rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white shadow-md shadow-navy-primary/25' : 'text-dark-slate/80 hover:bg-teal-primary/10 hover:text-teal-primary' }}"
+                    class="rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white shadow-md shadow-navy-primary/25' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary' }}"
                 >
                     {{ $item['label'] }}
                 </a>
@@ -38,8 +38,8 @@
         <div class="hidden items-center gap-3 md:flex">
             <x-dropdown align="right" width="56">
                 <x-slot name="trigger">
-                    <button class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-dark-slate transition hover:border-teal-primary/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-teal-primary/30">
-                        <span class="inline-grid h-7 w-7 place-items-center rounded-lg bg-teal-primary/10 text-teal-primary">
+                    <button class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-dark-slate transition hover:border-[#0B4A85]/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/30">
+                        <span class="inline-grid h-7 w-7 place-items-center rounded-lg bg-[#E7EFF6] text-[#0B4A85]">
                             {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                         </span>
                         <span>{{ Auth::user()->name }}</span>
@@ -69,7 +69,7 @@
 
         <button
             @click="open = !open"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-dark-slate/80 transition hover:border-teal-primary/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-teal-primary/30 md:hidden"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-dark-slate/80 transition hover:border-[#0B4A85]/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/30 md:hidden"
         >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                 <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -93,7 +93,7 @@
             @foreach ($navItems as $item)
                 <a
                     href="{{ route($item['route']) }}"
-                    class="block rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white' : 'text-dark-slate/80 hover:bg-teal-primary/10 hover:text-teal-primary' }}"
+                    class="block rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary' }}"
                 >
                     {{ $item['label'] }}
                 </a>

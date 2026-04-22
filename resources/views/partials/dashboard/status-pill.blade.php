@@ -2,17 +2,17 @@
     $tone = $tone ?? 'slate';
 
     $pillClasses = [
-        'emerald' => 'border-teal-primary/30 bg-teal-primary/10 text-teal-primary',
-        'rose' => 'border-coral-accent/30 bg-coral-accent/10 text-coral-accent',
+        'emerald' => 'border-[#0B4A85]/30 bg-[#E7EFF6] text-[#063157]',
+        'rose' => 'border-rose-300 bg-rose-50 text-rose-700',
         'slate' => 'border-dark-slate/25 bg-dark-slate/10 text-dark-slate',
-        'amber' => 'border-mustard-caution/35 bg-mustard-caution/10 text-mustard-caution',
+        'amber' => 'border-[#0B4A85]/30 bg-[#E7EFF6] text-[#0B4A85]',
     ][$tone] ?? 'border-dark-slate/25 bg-dark-slate/10 text-dark-slate';
 
     $dotClasses = [
-        'emerald' => 'bg-teal-primary',
-        'rose' => 'bg-coral-accent',
+        'emerald' => 'bg-[#0B4A85]',
+        'rose' => 'bg-rose-600',
         'slate' => 'bg-dark-slate',
-        'amber' => 'bg-mustard-caution',
+        'amber' => 'bg-[#0B4A85]',
     ][$tone] ?? 'bg-dark-slate';
 @endphp
 

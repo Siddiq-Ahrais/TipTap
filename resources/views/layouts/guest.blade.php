@@ -14,8 +14,10 @@
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @endif
     </head>
-    <body class="min-h-screen flex flex-col bg-slate-50 text-dark-slate antialiased">
+    <body class="min-h-screen flex flex-col antialiased {{ $variant === 'admin' || request()->routeIs('admin.login') ? 'bg-[#063157] text-slate-100' : 'bg-slate-50 text-dark-slate' }}">
         @php
+            $isAdminVariant = $variant === 'admin' || request()->routeIs('admin.login');
+
             $guestNavItems = [
                 ['label' => 'Home', 'route' => 'home', 'active' => 'home'],
                 ['label' => 'About', 'route' => 'about', 'active' => 'about'],
@@ -26,32 +28,45 @@
             $guestNavItems = array_values(array_filter($guestNavItems, fn (array $item): bool => Route::has($item['route'])));
         @endphp
 
-        <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-            <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
-                <a href="{{ route('home') }}" class="text-xl font-extrabold tracking-tight text-navy-primary">TipTap</a>
+        <header class="sticky top-0 z-40 border-b backdrop-blur {{ $isAdminVariant ? 'border-slate-100/10 bg-[#063157]/90' : 'border-[#0B4A85]/15 bg-white/90' }}">
+            <div class="flex h-16 w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
+                <a href="{{ route('home') }}" class="shrink-0 text-xl font-extrabold tracking-tight {{ $isAdminVariant ? 'text-slate-100' : 'text-navy-primary' }}">TipTap</a>
 
-                <nav class="flex items-center gap-4 text-sm sm:gap-6">
+                <div class="flex min-w-0 items-center justify-end gap-2 sm:gap-4">
+                    <nav class="flex items-center gap-3 text-sm sm:gap-6">
                     @foreach ($guestNavItems as $item)
                         @php
                             $isActive = request()->routeIs($item['active']);
                         @endphp
                         <a
                             href="{{ route($item['route']) }}"
-                            class="group relative px-1 py-2 font-medium transition-colors duration-200 {{ $isActive ? 'text-teal-primary' : 'text-dark-slate/80 hover:text-teal-primary' }}"
+                            class="group relative px-1 py-2 font-medium transition-colors duration-200 {{ $isActive ? ($isAdminVariant ? 'text-white' : 'text-navy-primary') : ($isAdminVariant ? 'text-slate-200/85 hover:text-white' : 'text-dark-slate/80 hover:text-navy-primary') }}"
                         >
                             {{ $item['label'] }}
-                            <span class="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-teal-primary transition-all duration-200 {{ $isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }}"></span>
+                            <span class="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full {{ $isAdminVariant ? 'bg-white' : 'bg-navy-primary' }} transition-all duration-200 {{ $isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }}"></span>
                         </a>
                     @endforeach
-                </nav>
+                    </nav>
+
+                    @if (Route::has('admin.login') && !$isAdminVariant)
+                        <a
+                            href="{{ route('admin.login') }}"
+                            class="inline-flex shrink-0 items-center rounded-lg bg-navy-primary px-2.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-navy-primary/30 transition-colors duration-200 hover:bg-navy-dark sm:px-3.5 sm:py-2 sm:text-sm"
+                        >
+                            Admin Login
+                        </a>
+                    @endif
+                </div>
             </div>
         </header>
 
-        <main class="relative flex-grow overflow-hidden">
-            <div class="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-teal-primary/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -right-20 top-1/3 h-72 w-72 rounded-full bg-navy-primary/10 blur-3xl"></div>
+        <main class="relative flex-1 overflow-hidden">
+            @if (!$isAdminVariant)
+                <div class="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-navy-light blur-3xl"></div>
+                <div class="pointer-events-none absolute -right-20 top-1/3 h-72 w-72 rounded-full bg-navy-primary/10 blur-3xl"></div>
+            @endif
 
-            <div class="relative mx-auto flex w-full max-w-7xl flex-grow flex-col px-4 py-6 sm:px-6 sm:py-8">
+            <div class="relative flex min-h-[calc(100vh-4rem)] w-full flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
                 @hasSection('content')
                     @yield('content')
                 @else
@@ -59,5 +74,6 @@
                 @endif
             </div>
         </main>
+
     </body>
 </html>

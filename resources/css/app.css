@@ -7,9 +7,8 @@
 @layer base {
 	:root {
 		--navy-primary: 11 74 133;
-		--teal-primary: 17 165 130;
-		--coral-accent: 255 107 107;
-		--mustard-caution: 251 177 23;
+		--navy-dark: 6 49 87;
+		--navy-light: 231 239 246;
 		--dark-slate: 45 55 72;
 	}
 
@@ -47,7 +46,7 @@
 	.auth-scene {
 		@apply relative isolate min-h-screen overflow-hidden;
 		background:
-			linear-gradient(145deg, rgba(209, 250, 229, 0.8) 0%, rgba(226, 232, 240, 0.85) 44%, rgba(203, 213, 225, 0.95) 100%);
+			linear-gradient(145deg, rgba(231, 239, 246, 0.95) 0%, rgba(219, 230, 241, 0.92) 48%, rgba(197, 215, 232, 0.96) 100%);
 	}
 
 	.auth-orb {
@@ -56,12 +55,12 @@
 
 	.auth-orb-left {
 		@apply -left-28 top-12 h-72 w-72;
-		background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 65%);
+		background: radial-gradient(circle, rgba(11, 74, 133, 0.18), transparent 65%);
 	}
 
 	.auth-orb-right {
 		@apply -right-28 bottom-0 h-80 w-80;
-		background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent 62%);
+		background: radial-gradient(circle, rgba(6, 49, 87, 0.24), transparent 62%);
 	}
 
 	.sidebar-link {
@@ -69,7 +68,7 @@
 	}
 
 	.sidebar-link:hover {
-		@apply bg-teal-primary/10 text-teal-primary;
+		@apply bg-navy-light text-navy-primary;
 	}
 
 	.sidebar-link-active {
@@ -87,7 +86,7 @@
 	}
 
 	.btn-primary-cta:focus-visible {
-		@apply outline-none ring-2 ring-teal-primary/40 ring-offset-2 ring-offset-white;
+		@apply outline-none ring-2 ring-navy-primary/40 ring-offset-2 ring-offset-white;
 	}
 
 	.btn-primary-cta:disabled {

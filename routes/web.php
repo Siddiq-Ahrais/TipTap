@@ -10,6 +10,10 @@ use App\Http\Controllers\LeaveController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 
+Route::middleware('guest')->group(function (): void {
+	Route::view('/admin/login', 'auth.admin-login')->name('admin.login');
+});
+
 Route::view('/dashboard', 'dashboard')
         ->middleware(['auth', 'approved'])
         ->name('dashboard');

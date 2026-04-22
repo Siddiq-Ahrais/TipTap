@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-navy-primary leading-tight">
                 {{ __('Leave History') }}
             </h2>
-            <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-teal-primary hover:bg-[#0e8f71] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-primary transition-all duration-200 hover:-translate-y-0.5">
+            <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-[#0B4A85] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] transition-all duration-200 hover:-translate-y-0.5">
                 <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
@@ -16,11 +16,11 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Filter & Sorting -->
-            <div class="bg-white shadow sm:rounded-lg mb-6 p-4">
+            <div class="bg-white shadow sm:rounded-lg mb-6 p-4 border border-[#0B4A85]/15">
                 <form action="{{ route('leaves.index') }}" method="GET" class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-2">
                         <label for="status" class="text-sm font-medium text-dark-slate">Filter by Status:</label>
-                        <select id="status" name="status" onchange="this.form.submit()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-primary focus:border-teal-primary sm:text-sm rounded-md transition-colors">
+                        <select id="status" name="status" onchange="this.form.submit()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-[#0B4A85]/25 focus:outline-none focus:ring-[#0B4A85] focus:border-[#0B4A85] sm:text-sm rounded-md transition-colors">
                             <option value="">All Statuses</option>
                             <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
                             <option value="Approved" {{ request('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
@@ -31,21 +31,21 @@
             </div>
 
             <!-- List/Table View -->
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-[#0B4A85]/15">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-[#0B4A85]">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                     Submission Date
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                     Leave Type
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                     Duration
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                     Status
                                 </th>
                                 <th scope="col" class="relative px-6 py-3">
@@ -60,7 +60,7 @@
                                     $end = \Carbon\Carbon::parse($leave->tanggal_selesai);
                                     $days = $start->diffInDays($end) + 1; // inclusive of start day
                                 @endphp
-                                <tr class="toggle-row cursor-pointer transition-all duration-200 hover:bg-teal-primary/5 hover:opacity-95" data-target="details-{{ $leave->id }}">
+                                <tr class="toggle-row cursor-pointer transition-all duration-200 hover:bg-navy-light/70 hover:opacity-95" data-target="details-{{ $leave->id }}">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $leave->created_at->format('M d, Y') }}
                                         <div class="text-xs text-gray-500">{{ $leave->created_at->format('h:i A') }}</div>
@@ -70,30 +70,30 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $start->format('M d') }} - {{ $end->format('M d, Y') }}
-                                        <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                        <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#E7EFF6] text-[#063157] border border-[#0B4A85]/20">
                                             {{ $days }} {{ Str::plural('day', $days) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         @if (strtolower($leave->status_approval) === 'approved')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-primary/10 text-teal-primary border border-teal-primary/25">
-                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-teal-primary" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E7EFF6] text-[#063157] border border-[#0B4A85]/30">
+                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85]" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
                                                 Approved
                                             </span>
                                         @elseif (strtolower($leave->status_approval) === 'rejected')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-coral-accent/10 text-coral-accent border border-coral-accent/25">
-                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-coral-accent" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-300">
+                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-rose-600" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
                                                 Rejected
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-mustard-caution/10 text-mustard-caution border border-mustard-caution/30">
-                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-mustard-caution animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E7EFF6] text-[#0B4A85] border border-[#0B4A85]/30">
+                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85] animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
                                                 Pending
                                             </span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button class="text-navy-primary hover:text-teal-primary transition-colors">
+                                        <button class="text-navy-primary hover:text-[#063157] transition-colors">
                                             View Details
                                             <svg class="w-4 h-4 inline transform transition-transform duration-200 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                         </button>
@@ -101,22 +101,22 @@
                                 </tr>
 
                                 <!-- Expandable Details Row -->
-                                <tr id="details-{{ $leave->id }}" class="hidden bg-gray-50/50 border-b border-gray-200 w-full transition-all duration-300 ease-in-out">
+                                <tr id="details-{{ $leave->id }}" class="hidden bg-navy-light/40 border-b border-[#0B4A85]/10 w-full transition-all duration-300 ease-in-out">
                                     <td colspan="5" class="px-6 py-4">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <h4 class="text-sm font-bold text-gray-900 mb-2">Reason for Absence</h4>
-                                                <p class="text-sm text-gray-700 p-3 bg-white rounded-md border border-gray-200 shadow-sm whitespace-pre-wrap">{{ $leave->alasan }}</p>
+                                                <p class="text-sm text-gray-700 p-3 bg-white rounded-md border border-[#0B4A85]/15 shadow-sm whitespace-pre-wrap">{{ $leave->alasan }}</p>
                                                 
                                                 @if(strtolower($leave->status_approval) === 'rejected')
-                                                    <h4 class="text-sm font-bold text-coral-accent mt-4 mb-2">Rejection Reason</h4>
-                                                    <p class="text-sm text-coral-accent p-3 bg-coral-accent/10 rounded-md border border-coral-accent/25 shadow-sm whitespace-pre-wrap">{{ $leave->rejection_reason ?? 'No detailed reason provided.' }}</p>
+                                                    <h4 class="text-sm font-bold text-rose-700 mt-4 mb-2">Rejection Reason</h4>
+                                                    <p class="text-sm text-rose-700 p-3 bg-rose-50 rounded-md border border-rose-300 shadow-sm whitespace-pre-wrap">{{ $leave->rejection_reason ?? 'No detailed reason provided.' }}</p>
                                                 @endif
                                             </div>
                                             <div>
                                                 <h4 class="text-sm font-bold text-gray-900 mb-2">Supporting Document</h4>
                                                 @if ($leave->bukti_file)
-                                                    <div class="flex items-center space-x-3 p-3 bg-white rounded-md border border-gray-200 shadow-sm">
+                                                    <div class="flex items-center space-x-3 p-3 bg-white rounded-md border border-[#0B4A85]/15 shadow-sm">
                                                         <div class="flex-shrink-0">
                                                             @php
                                                                 $extension = pathinfo($leave->bukti_file, PATHINFO_EXTENSION);
@@ -133,7 +133,7 @@
                                                             </p>
                                                         </div>
                                                         <div>
-                                                            <a href="{{ Storage::url($leave->bukti_file) }}" target="_blank" class="inline-flex items-center px-2.5 py-1.5 border border-navy-primary/30 shadow-sm text-xs font-medium rounded text-navy-primary bg-white hover:bg-navy-primary/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-primary">
+                                                            <a href="{{ Storage::url($leave->bukti_file) }}" target="_blank" class="inline-flex items-center px-2.5 py-1.5 border border-navy-primary/30 shadow-sm text-xs font-medium rounded text-navy-primary bg-white hover:bg-navy-primary/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85]">
                                                                 View
                                                             </a>
                                                         </div>
@@ -151,7 +151,7 @@
                                         <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                                         <p class="text-lg font-medium">No leave records found</p>
                                         <p class="text-sm">You haven't submitted any leave requests yet.</p>
-                                        <a href="{{ route('leaves.create') }}" class="mt-4 inline-block text-teal-primary hover:text-[#0e8f71] font-medium">Submit your first request &rarr;</a>
+                                        <a href="{{ route('leaves.create') }}" class="mt-4 inline-block text-navy-primary hover:text-[#063157] font-medium">Submit your first request &rarr;</a>
                                     </td>
                                 </tr>
                             @endforelse
