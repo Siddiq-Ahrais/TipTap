@@ -19,8 +19,8 @@ class Attendance extends Model
 
     protected $casts = [
         'tanggal' => 'date',
-        'waktu_masuk' => 'time',
-        'waktu_keluar' => 'time',
+        'waktu_masuk' => 'datetime:H:i:s',
+        'waktu_keluar' => 'datetime:H:i:s',
     ];
 
     /**

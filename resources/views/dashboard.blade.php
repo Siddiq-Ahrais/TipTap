@@ -10,7 +10,24 @@
         $employeeAvatar = data_get($dashboardUser, 'avatar_url');
         $isAdminDashboard = in_array(strtolower((string) $employeeRole), ['admin', 'administrator', 'super admin', 'super_admin'], true);
 
-        $normalizedStatus = strtolower((string) ($todayStatus ?? 'not_yet_clocked_in'));
+        $todayAttendanceRecord = \App\Models\Attendance::query()
+            ->where('user_id', auth()->id())
+            ->whereDate('tanggal', now()->toDateString())
+            ->first();
+
+        $effectiveTodayStatus = $todayStatus ?? null;
+
+        if ($effectiveTodayStatus === null) {
+            if (! $todayAttendanceRecord) {
+                $effectiveTodayStatus = 'not_yet_clocked_in';
+            } elseif (data_get($todayAttendanceRecord, 'waktu_keluar')) {
+                $effectiveTodayStatus = 'checked_out';
+            } else {
+                $effectiveTodayStatus = strtolower((string) data_get($todayAttendanceRecord, 'status', 'checked_in'));
+            }
+        }
+
+        $normalizedStatus = strtolower((string) ($effectiveTodayStatus ?? 'not_yet_clocked_in'));
         $statusAliases = [
             'checked_in' => 'checked_in',
             'hadir' => 'checked_in',
@@ -65,7 +82,21 @@
         $todayMeta = $statusMeta[$statusKey];
 
         $canClockIn = in_array($statusKey, ['not_yet_clocked_in', 'absent'], true);
-        $canClockOut = in_array($statusKey, ['checked_in', 'late'], true);
+        $canAttemptClockOut = in_array($statusKey, ['checked_in', 'late'], true);
+
+        $clockOutMinimumMinutes = 360;
+        $clockInTimeValue = data_get($todayAttendanceRecord, 'waktu_masuk');
+        $clockInAt = null;
+
+        if ($clockInTimeValue instanceof \Illuminate\Support\Carbon) {
+            $clockInAt = $clockInTimeValue->copy();
+        } elseif (! empty($clockInTimeValue)) {
+            $clockInAt = \Illuminate\Support\Carbon::parse((string) $clockInTimeValue);
+        }
+
+        $minutesSinceClockIn = $clockInAt ? max(0, $clockInAt->diffInMinutes(now(), false)) : 0;
+        $remainingClockOutMinutes = $canAttemptClockOut ? max(0, $clockOutMinimumMinutes - $minutesSinceClockIn) : 0;
+        $canClockOut = $canAttemptClockOut && $remainingClockOutMinutes === 0;
 
         $metricCards = $metrics ?? [
             [
@@ -91,7 +122,17 @@
             ],
         ];
 
-        $attendanceRows = collect($attendanceHistory ?? [])->take(6);
+        $attendanceRows = collect($attendanceHistory ?? []);
+
+        if ($attendanceRows->isEmpty()) {
+            $attendanceRows = \App\Models\Attendance::query()
+                ->where('user_id', auth()->id())
+                ->latest('tanggal')
+                ->limit(6)
+                ->get();
+        }
+
+        $attendanceRows = $attendanceRows->take(6);
 
         $quickActions = [
             [
@@ -103,6 +144,11 @@
                 'label' => 'Manage Posts',
                 'description' => 'Create and maintain internal post updates.',
                 'route' => 'posts.index',
+            ],
+            [
+                'label' => 'Profile',
+                'description' => 'Update your personal account information and credentials.',
+                'route' => 'profile.edit',
             ],
         ];
 
@@ -455,6 +501,18 @@
         </div>
     @else
         <div class="space-y-6">
+            @if (session('status'))
+                <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if ($errors->has('attendance'))
+                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    {{ $errors->first('attendance') }}
+                </div>
+            @endif
+
             <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                 <section class="card-soft rounded-3xl p-6 sm:p-7">
                     <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -498,34 +556,46 @@
 
                     <div class="mt-6">
                         @if ($canClockIn)
-                            <form method="POST" action="{{ url('/clock-in') }}" x-data="{ loading: false }" @submit="loading = true">
+                            <form method="POST" action="{{ url('/clock-in') }}">
                                 @csrf
                                 <button
                                     type="submit"
-                                    :disabled="loading"
-                                    class="inline-flex w-full items-center justify-center rounded-2xl bg-[#0B4A85] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/35 focus:ring-offset-2"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border border-[#0B4A85] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/35 focus:ring-offset-2"
+                                    style="background-color: #0B4A85; color: #FFFFFF;"
                                 >
-                                    <span x-show="!loading">Clock In</span>
-                                    <span x-cloak x-show="loading" class="inline-flex items-center gap-2">
-                                        <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="4" />
-                                            <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
-                                        </svg>
-                                        Processing
-                                    </span>
+                                    Clock In
                                 </button>
                             </form>
-                        @elseif ($canClockOut)
-                            <form method="POST" action="{{ url('/clock-out') }}" x-data="{ loading: false }" @submit="loading = true">
+                        @elseif ($canAttemptClockOut)
+                            <form
+                                method="POST"
+                                action="{{ url('/clock-out') }}"
+                                x-data="{ loading: false, earlyConfirmed: false }"
+                                @submit.prevent="
+                                    if (loading || {{ $canClockOut ? 'false' : 'true' }}) return;
+                                    const [endHour, endMinute] = '{{ $officeCheckOut }}'.split(':').map(Number);
+                                    const nowTime = new Date();
+                                    const cutoffTime = new Date();
+                                    cutoffTime.setHours(endHour, endMinute || 0, 0, 0);
+                                    if (nowTime < cutoffTime && !earlyConfirmed) {
+                                        if (!window.confirm('are you sure want to leave early?')) return;
+                                        earlyConfirmed = true;
+                                    }
+                                    loading = true;
+                                    $el.submit();
+                                "
+                            >
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="confirm_early_leave" :value="earlyConfirmed ? 1 : 0">
                                 <button
                                     type="submit"
-                                    :disabled="loading"
-                                    class="inline-flex w-full items-center justify-center rounded-2xl bg-navy-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] hover:bg-[#083a6a] focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2"
+                                    :disabled="loading || {{ $canClockOut ? 'false' : 'true' }}"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2 {{ $canClockOut ? 'border-[#0B4A85] hover:scale-[1.02]' : 'cursor-not-allowed border-slate-400 bg-slate-400' }}"
+                                    style="{{ $canClockOut ? 'background-color: #0B4A85; color: #FFFFFF;' : '' }}"
                                 >
-                                    <span x-show="!loading">Clock Out</span>
-                                    <span x-cloak x-show="loading" class="inline-flex items-center gap-2">
+                                    <span x-show="!loading" class="inline-block">{{ $canClockOut ? 'Clock Out' : 'Clock Out (Locked)' }}</span>
+                                    <span x-cloak x-show="loading" class="inline-flex items-center gap-2" style="display: none;">
                                         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="4" />
                                             <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
@@ -538,7 +608,7 @@
                             <button
                                 type="button"
                                 disabled
-                                class="inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl bg-slate-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white"
+                                class="inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl border border-slate-400 bg-slate-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white"
                             >
                                 Attendance Completed
                             </button>
@@ -546,7 +616,11 @@
                     </div>
 
                     <p class="mt-3 text-xs text-slate-500">
-                        Button state is rendered dynamically using Blade status checks.
+                        @if ($canAttemptClockOut && ! $canClockOut)
+                            Clock Out becomes available after 6 hours from your clock-in. Remaining: {{ $remainingClockOutMinutes }} minutes.
+                        @else
+                            Button state is rendered dynamically using Blade status checks.
+                        @endif
                     </p>
                 </section>
             </div>

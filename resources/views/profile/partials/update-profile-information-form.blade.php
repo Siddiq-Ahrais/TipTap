@@ -47,8 +47,21 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="flex flex-wrap items-center gap-3">
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-lg border border-[#0B4A85] px-5 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/40"
+                style="background-color: #0B4A85; color: #FFFFFF;"
+            >
+                Save
+            </button>
+
+            <button
+                type="reset"
+                class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/25"
+            >
+                {{ __('Cancel') }}
+            </button>
 
             @if (session('status') === 'profile-updated')
                 <p
