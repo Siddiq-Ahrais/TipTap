@@ -71,6 +71,38 @@ class AttendanceController extends Controller
             return $this->errorResponse($request, 'User has already clocked out.', 400);
         }
 
+        if ($attendance->early_checkout_status === 'pending') {
+            return $this->errorResponse($request, 'Your early checkout request is already waiting for admin approval.', 422);
+        }
+
+        if ($attendance->early_checkout_status === 'rejected') {
+            return $this->errorResponse($request, 'Your early checkout request was rejected by admin.', 422);
+        }
+
+        if ($attendance->early_checkout_status === 'approved') {
+            return $this->errorResponse($request, 'Your early checkout request has already been approved.', 422);
+        }
+
+        $officeCheckoutTime = Setting::query()->value('jam_mulai_pulang') ?? '17:00:00';
+        $officeCheckoutAt = Carbon::parse($today.' '.$officeCheckoutTime);
+        $confirmedEarlyLeave = filter_var($request->input('confirm_early_leave', false), FILTER_VALIDATE_BOOL);
+
+        if ($now->lt($officeCheckoutAt)) {
+            if (! $confirmedEarlyLeave) {
+                return $this->errorResponse($request, 'Are you sure you want to leave early?', 422);
+            }
+
+            $attendance->update([
+                'early_checkout_status' => 'pending',
+                'early_checkout_requested_at' => $now,
+                'early_checkout_reviewed_at' => null,
+                'early_checkout_reviewed_by' => null,
+                'early_checkout_note' => null,
+            ]);
+
+            return $this->successResponse($request, 'Early checkout request submitted. Please wait for admin approval.', 202, $attendance->fresh());
+        }
+
         $clockInValue = $attendance->waktu_masuk;
 
         $clockInAt = $clockInValue instanceof Carbon
@@ -89,16 +121,13 @@ class AttendanceController extends Controller
             );
         }
 
-        $officeCheckoutTime = Setting::query()->value('jam_mulai_pulang') ?? '17:00:00';
-        $officeCheckoutAt = Carbon::parse($today.' '.$officeCheckoutTime);
-        $confirmedEarlyLeave = filter_var($request->input('confirm_early_leave', false), FILTER_VALIDATE_BOOL);
-
-        if ($now->lt($officeCheckoutAt) && ! $confirmedEarlyLeave) {
-            return $this->errorResponse($request, 'are you sure want to leave early?', 422);
-        }
-
         $attendance->update([
             'waktu_keluar' => $now->format('H:i:s'),
+            'early_checkout_status' => null,
+            'early_checkout_requested_at' => null,
+            'early_checkout_reviewed_at' => null,
+            'early_checkout_reviewed_by' => null,
+            'early_checkout_note' => null,
         ]);
 
         return $this->successResponse($request, 'Clock-out successful.', 200, $attendance->fresh());

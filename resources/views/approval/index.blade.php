@@ -26,64 +26,46 @@
             </div>
         @endif
 
-        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <header class="bg-[#0B4A85] text-white">
-                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <h3 class="font-display text-lg font-semibold">Pending Registrations</h3>
-                    <p class="text-sm text-white/85">Approve official employees before they can log in</p>
+        <section class="grid gap-5 lg:grid-cols-2">
+            <a href="{{ route('approval.registrations.index') }}" class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#0B4A85]/60 hover:shadow-lg">
+                <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B4A85]/10 transition group-hover:bg-[#0B4A85]/20"></div>
+                <div class="relative">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B4A85]">Approval Category</p>
+                    <h3 class="mt-2 font-display text-2xl font-bold text-slate-900">Pending Registrations</h3>
+                    <p class="mt-2 text-sm text-slate-600">Review new account registrations and approve official employees.</p>
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]">
+                            {{ $pendingUsersCount }} Pending
+                        </span>
+                        <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B4A85]">
+                            Open Menu
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-2.293-2.293a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
-            </header>
+            </a>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-slate-100 text-slate-700">
-                        <tr>
-                            <th class="p-4 text-left font-semibold">Name</th>
-                            <th class="p-4 text-left font-semibold">Email</th>
-                            <th class="p-4 text-left font-semibold">Registered</th>
-                            <th class="p-4 text-left font-semibold">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($pendingUsers as $user)
-                            <tr class="border-b border-gray-200 hover:bg-slate-50">
-                                <td class="p-4 font-medium text-slate-800">{{ $user->name }}</td>
-                                <td class="p-4 text-slate-600">{{ $user->email }}</td>
-                                <td class="p-4 text-slate-600">{{ $user->created_at?->format('d M Y H:i') }}</td>
-                                <td class="p-4">
-                                    <div class="flex flex-wrap gap-2">
-                                        <form method="POST" action="{{ route('approval.users.approve', $user) }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-[#0B4A85] px-4 py-2 font-medium text-white transition hover:bg-[#063157]">
-                                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3.75-3.75a1 1 0 011.414-1.414l3.043 3.043 6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                                </svg>
-                                                Approve
-                                            </button>
-                                        </form>
-
-                                        <form method="POST" action="{{ route('approval.users.reject', $user) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md border border-rose-300 px-4 py-2 font-medium text-rose-700 transition hover:bg-rose-50">
-                                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                </svg>
-                                                Reject
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="p-6 text-center text-slate-500">No pending registrations right now.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            <a href="{{ route('approval.early-checkouts.index') }}" class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#0B4A85]/60 hover:shadow-lg">
+                <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B4A85]/10 transition group-hover:bg-[#0B4A85]/20"></div>
+                <div class="relative">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B4A85]">Approval Category</p>
+                    <h3 class="mt-2 font-display text-2xl font-bold text-slate-900">Early Checkout Approval</h3>
+                    <p class="mt-2 text-sm text-slate-600">Handle employee requests to clock out before office checkout time.</p>
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]">
+                            {{ $pendingEarlyCheckoutCount }} Pending
+                        </span>
+                        <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B4A85]">
+                            Open Menu
+                            <svg class="h-4 w-4 transition group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h9.586l-2.293-2.293a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </a>
         </section>
 
         <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">

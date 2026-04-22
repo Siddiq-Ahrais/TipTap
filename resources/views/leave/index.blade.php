@@ -1,20 +1,75 @@
 <x-app-layout>
+    @php
+        $todayAttendance = \App\Models\Attendance::query()
+            ->where('user_id', auth()->id())
+            ->whereDate('tanggal', now()->toDateString())
+            ->first();
+
+        $earlyStatus = strtolower((string) data_get($todayAttendance, 'early_checkout_status'));
+        $canSubmitEarlyClockOut = $todayAttendance
+            && ! data_get($todayAttendance, 'waktu_keluar')
+            && ! in_array($earlyStatus, ['pending', 'approved'], true);
+    @endphp
+
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <h2 class="font-semibold text-xl text-navy-primary leading-tight">
-                {{ __('Leave History') }}
+                {{ __('Leaves') }}
             </h2>
             <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-[#0B4A85] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] transition-all duration-200 hover:-translate-y-0.5">
                 <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
-                New Request
+                Request Leave
             </a>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if (session('status'))
+                <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if ($errors->has('attendance'))
+                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                    {{ $errors->first('attendance') }}
+                </div>
+            @endif
+
+            <section class="bg-white shadow sm:rounded-lg mb-6 p-6 border border-[#0B4A85]/15">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Attendance Menu</p>
+                        <h3 class="mt-1 text-xl font-semibold text-navy-primary">Request Early Clock Out</h3>
+                        <p class="mt-1 text-sm text-gray-500">Submit request to admin if you need to clock out before office check-out time.</p>
+                    </div>
+
+                    @if ($todayAttendance && $earlyStatus === 'pending')
+                        <span class="inline-flex items-center rounded-full border border-[#0B4A85]/30 bg-[#E7EFF6] px-4 py-2 text-sm font-medium text-[#0B4A85]">
+                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85] animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                            Waiting Admin Approval
+                        </span>
+                    @elseif ($canSubmitEarlyClockOut)
+                        <form method="POST" action="{{ url('/clock-out') }}" onsubmit="return window.confirm('Are you sure you want to request early clock out?');">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="confirm_early_leave" value="1">
+                            <button type="submit" class="inline-flex items-center rounded-md border border-[#0B4A85] bg-[#0B4A85] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-[#0B4A85] focus:ring-offset-2">
+                                Submit Early Clock Out
+                            </button>
+                        </form>
+                    @else
+                        <span class="inline-flex items-center rounded-full border border-[#0B4A85]/30 bg-[#E7EFF6] px-4 py-2 text-sm font-medium text-[#063157]">
+                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85]" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                            Early clock out request unavailable
+                        </span>
+                    @endif
+                </div>
+            </section>
+
             <!-- Filter & Sorting -->
             <div class="bg-white shadow sm:rounded-lg mb-6 p-4 border border-[#0B4A85]/15">
                 <form action="{{ route('leaves.index') }}" method="GET" class="flex flex-col sm:flex-row items-center justify-between gap-4">

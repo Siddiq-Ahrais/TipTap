@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class ApprovalController extends Controller
@@ -23,14 +25,47 @@ class ApprovalController extends Controller
             ]
         );
 
+        $pendingUsersCount = User::query()
+            ->where('is_approved', false)
+            ->count();
+
+        $pendingEarlyCheckoutCount = Attendance::query()
+            ->where('early_checkout_status', 'pending')
+            ->count();
+
+        return view('approval.index', [
+            'pendingUsersCount' => $pendingUsersCount,
+            'pendingEarlyCheckoutCount' => $pendingEarlyCheckoutCount,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function registrations(Request $request): View
+    {
+        $this->ensureAdmin($request);
+
         $pendingUsers = User::query()
             ->where('is_approved', false)
             ->orderBy('created_at')
             ->get();
 
-        return view('approval.index', [
+        return view('approval.registrations', [
             'pendingUsers' => $pendingUsers,
-            'settings' => $settings,
+        ]);
+    }
+
+    public function earlyCheckouts(Request $request): View
+    {
+        $this->ensureAdmin($request);
+
+        $pendingRequests = Attendance::query()
+            ->with('user:id,name,email')
+            ->where('early_checkout_status', 'pending')
+            ->orderByDesc('early_checkout_requested_at')
+            ->get();
+
+        return view('approval.early-checkouts', [
+            'pendingRequests' => $pendingRequests,
         ]);
     }
 
@@ -93,6 +128,46 @@ class ApprovalController extends Controller
         $settings->update($validated);
 
         return back()->with('status', 'Company settings updated successfully.');
+    }
+
+    public function approveEarlyCheckout(Request $request, Attendance $attendance): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        if ($attendance->early_checkout_status !== 'pending' || ! $attendance->early_checkout_requested_at) {
+            return back()->withErrors(['approval' => 'This early checkout request is no longer pending.']);
+        }
+
+        $approvedAt = Carbon::parse($attendance->early_checkout_requested_at);
+
+        $attendance->update([
+            'waktu_keluar' => $approvedAt->format('H:i:s'),
+            'status' => 'Pulang Cepat',
+            'early_checkout_status' => 'approved',
+            'early_checkout_reviewed_at' => now(),
+            'early_checkout_reviewed_by' => $request->user()->id,
+            'early_checkout_note' => null,
+        ]);
+
+        return back()->with('status', 'Early checkout request approved successfully.');
+    }
+
+    public function rejectEarlyCheckout(Request $request, Attendance $attendance): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        if ($attendance->early_checkout_status !== 'pending') {
+            return back()->withErrors(['approval' => 'This early checkout request is no longer pending.']);
+        }
+
+        $attendance->update([
+            'early_checkout_status' => 'rejected',
+            'early_checkout_reviewed_at' => now(),
+            'early_checkout_reviewed_by' => $request->user()->id,
+            'early_checkout_note' => (string) $request->input('note', ''),
+        ]);
+
+        return back()->with('status', 'Early checkout request rejected.');
     }
 
     private function ensureAdmin(Request $request): void

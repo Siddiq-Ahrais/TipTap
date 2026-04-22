@@ -22,6 +22,8 @@
                 $effectiveTodayStatus = 'not_yet_clocked_in';
             } elseif (data_get($todayAttendanceRecord, 'waktu_keluar')) {
                 $effectiveTodayStatus = 'checked_out';
+            } elseif (strtolower((string) data_get($todayAttendanceRecord, 'early_checkout_status')) === 'pending') {
+                $effectiveTodayStatus = 'pending';
             } else {
                 $effectiveTodayStatus = strtolower((string) data_get($todayAttendanceRecord, 'status', 'checked_in'));
             }
@@ -97,6 +99,8 @@
         $minutesSinceClockIn = $clockInAt ? max(0, $clockInAt->diffInMinutes(now(), false)) : 0;
         $remainingClockOutMinutes = $canAttemptClockOut ? max(0, $clockOutMinimumMinutes - $minutesSinceClockIn) : 0;
         $canClockOut = $canAttemptClockOut && $remainingClockOutMinutes === 0;
+        $officeCheckoutAt = \Illuminate\Support\Carbon::parse(now()->toDateString().' '.$officeCheckOut.':00');
+        $canRequestEarlyClockOut = $canAttemptClockOut && now()->lt($officeCheckoutAt);
 
         $metricCards = $metrics ?? [
             [
@@ -572,7 +576,7 @@
                                 action="{{ url('/clock-out') }}"
                                 x-data="{ loading: false, earlyConfirmed: false }"
                                 @submit.prevent="
-                                    if (loading || {{ $canClockOut ? 'false' : 'true' }}) return;
+                                    if (loading || {{ ($canClockOut || $canRequestEarlyClockOut) ? 'false' : 'true' }}) return;
                                     const [endHour, endMinute] = '{{ $officeCheckOut }}'.split(':').map(Number);
                                     const nowTime = new Date();
                                     const cutoffTime = new Date();
@@ -590,20 +594,30 @@
                                 <input type="hidden" name="confirm_early_leave" :value="earlyConfirmed ? 1 : 0">
                                 <button
                                     type="submit"
-                                    :disabled="loading || {{ $canClockOut ? 'false' : 'true' }}"
-                                    class="inline-flex w-full items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2 {{ $canClockOut ? 'border-[#0B4A85] hover:scale-[1.02]' : 'cursor-not-allowed border-slate-400 bg-slate-400' }}"
-                                    style="{{ $canClockOut ? 'background-color: #0B4A85; color: #FFFFFF;' : '' }}"
+                                    :disabled="loading || {{ ($canClockOut || $canRequestEarlyClockOut) ? 'false' : 'true' }}"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2 {{ ($canClockOut || $canRequestEarlyClockOut) ? 'border-[#0B4A85] hover:scale-[1.02]' : 'cursor-not-allowed border-slate-400 bg-slate-400' }}"
+                                    style="{{ ($canClockOut || $canRequestEarlyClockOut) ? 'background-color: #0B4A85; color: #FFFFFF;' : '' }}"
                                 >
-                                    <span x-show="!loading" class="inline-block">{{ $canClockOut ? 'Clock Out' : 'Clock Out (Locked)' }}</span>
+                                    <span x-show="!loading" class="inline-block">
+                                        {{ $canRequestEarlyClockOut ? 'Request Early Clock Out' : ($canClockOut ? 'Clock Out' : 'Clock Out (Locked)') }}
+                                    </span>
                                     <span x-cloak x-show="loading" class="inline-flex items-center gap-2" style="display: none;">
                                         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="4" />
                                             <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
                                         </svg>
-                                        Processing
+                                        {{ $canRequestEarlyClockOut ? 'Submitting Request' : 'Processing' }}
                                     </span>
                                 </button>
                             </form>
+                        @elseif ($statusKey === 'pending')
+                            <button
+                                type="button"
+                                disabled
+                                class="inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-amber-800"
+                            >
+                                Waiting Admin Approval
+                            </button>
                         @else
                             <button
                                 type="button"
@@ -616,7 +630,11 @@
                     </div>
 
                     <p class="mt-3 text-xs text-slate-500">
-                        @if ($canAttemptClockOut && ! $canClockOut)
+                        @if ($statusKey === 'pending')
+                            Your early clock-out request has been submitted and is waiting for admin decision.
+                        @elseif ($canRequestEarlyClockOut)
+                            You can submit an early clock-out request now. Admin approval is required before leaving.
+                        @elseif ($canAttemptClockOut && ! $canClockOut)
                             Clock Out becomes available after 6 hours from your clock-in. Remaining: {{ $remainingClockOutMinutes }} minutes.
                         @else
                             Button state is rendered dynamically using Blade status checks.

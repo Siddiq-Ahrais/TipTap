@@ -31,8 +31,12 @@ Route::middleware(['auth', 'approved'])->group(function (): void {
 
 	Route::prefix('approval')->name('approval.')->group(function (): void {
 		Route::get('/', [ApprovalController::class, 'index'])->name('index');
+		Route::get('/registrations', [ApprovalController::class, 'registrations'])->name('registrations.index');
+		Route::get('/early-checkouts', [ApprovalController::class, 'earlyCheckouts'])->name('early-checkouts.index');
 		Route::patch('/users/{user}/approve', [ApprovalController::class, 'approveUser'])->name('users.approve');
 		Route::delete('/users/{user}/reject', [ApprovalController::class, 'rejectUser'])->name('users.reject');
+		Route::patch('/early-checkouts/{attendance}/approve', [ApprovalController::class, 'approveEarlyCheckout'])->name('early-checkouts.approve');
+		Route::patch('/early-checkouts/{attendance}/reject', [ApprovalController::class, 'rejectEarlyCheckout'])->name('early-checkouts.reject');
 		Route::patch('/settings', [ApprovalController::class, 'updateSettings'])->name('settings.update');
 	});
 
