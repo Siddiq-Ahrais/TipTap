@@ -11,12 +11,18 @@
 		--navy-light: 231 239 246;
 		--doodle-color: 17 165 130;
 		--dark-slate: 45 55 72;
+		--surface-border: 201 214 228;
+		--surface-shadow-deep: 3 18 38;
+		--surface-shadow-soft: 8 33 63;
 	}
 
 	body {
 		font-family: 'DM Sans', sans-serif;
 		@apply antialiased bg-[#072C50];
 		color: #2D3748;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 
 	h1,
@@ -27,6 +33,11 @@
 	h6 {
 		font-family: 'Space Grotesk', sans-serif;
 		letter-spacing: -0.02em;
+		line-height: 1.15;
+	}
+
+	p {
+		line-height: 1.55;
 	}
 
 	[x-cloak] {
@@ -42,6 +53,11 @@
 		background-size: auto, 220px 220px;
 		background-attachment: fixed;
 	}
+
+	.workspace-shell ::selection {
+		background: rgba(17, 165, 130, 0.22);
+		color: #ffffff;
+	}
 }
 
 @layer components {
@@ -52,6 +68,66 @@
 	.card-soft {
 		@apply border border-slate-200 bg-white;
 		box-shadow: 0 24px 44px -30px rgba(2, 12, 27, 0.78), 0 12px 22px -18px rgba(6, 19, 36, 0.65);
+		border-color: rgba(var(--surface-border), 0.82);
+	}
+
+	/* Unified premium surface style for legacy and module cards without changing layout structure */
+	.workspace-shell .bg-white.shadow,
+	.workspace-shell .bg-white.shadow-sm,
+	.workspace-shell .bg-white.shadow-md {
+		border: 1px solid rgba(var(--surface-border), 0.86);
+		box-shadow:
+			0 20px 40px -30px rgba(var(--surface-shadow-deep), 0.82),
+			0 10px 20px -16px rgba(var(--surface-shadow-soft), 0.62);
+	}
+
+	.workspace-shell .bg-white.shadow:hover,
+	.workspace-shell .bg-white.shadow-sm:hover,
+	.workspace-shell .bg-white.shadow-md:hover,
+	.workspace-shell .card-soft:hover {
+		box-shadow:
+			0 26px 48px -30px rgba(var(--surface-shadow-deep), 0.88),
+			0 14px 24px -16px rgba(var(--surface-shadow-soft), 0.7);
+	}
+
+	/* Refined table/readability treatment */
+	.workspace-shell table thead th {
+		letter-spacing: 0.08em;
+	}
+
+	.workspace-shell table tbody td {
+		vertical-align: middle;
+	}
+
+	/* Premium form controls while preserving dimensions and behavior */
+	.workspace-shell input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+	.workspace-shell select,
+	.workspace-shell textarea {
+		border-color: rgba(148, 174, 201, 0.58);
+		background-color: rgba(255, 255, 255, 0.96);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+		transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+	}
+
+	.workspace-shell input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):focus,
+	.workspace-shell select:focus,
+	.workspace-shell textarea:focus {
+		border-color: rgba(11, 74, 133, 0.65);
+		box-shadow:
+			0 0 0 3px rgba(11, 74, 133, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.92);
+	}
+
+	/* Consistent interactive polish for existing action buttons */
+	.workspace-shell button,
+	.workspace-shell a[role='button'],
+	.workspace-shell .btn-primary-cta {
+		transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+	}
+
+	.workspace-shell button:hover,
+	.workspace-shell a[role='button']:hover {
+		filter: saturate(1.04);
 	}
 
 	.auth-scene {
