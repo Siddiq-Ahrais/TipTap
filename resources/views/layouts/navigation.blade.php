@@ -30,17 +30,6 @@
             </div>
         </div>
 
-        <div class="hidden items-center gap-1 md:flex">
-            @foreach ($navItems as $item)
-                <a
-                    href="{{ route($item['route']) }}"
-                    class="rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white shadow-md shadow-navy-primary/25' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary' }}"
-                >
-                    {{ $item['label'] }}
-                </a>
-            @endforeach
-        </div>
-
         <div class="hidden items-center gap-3 md:flex">
             <x-dropdown align="right" width="56">
                 <x-slot name="trigger">
