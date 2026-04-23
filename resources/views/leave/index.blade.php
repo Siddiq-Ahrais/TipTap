@@ -70,6 +70,63 @@
                 </div>
             </section>
 
+            <section class="bg-white shadow sm:rounded-lg mb-6 p-6 border border-[#0B4A85]/15">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Attendance History</p>
+                        <h3 class="mt-1 text-xl font-semibold text-navy-primary">Recent Attendance History</h3>
+                        <p class="mt-1 text-sm text-gray-500">Latest attendance records from your dashboard timeline.</p>
+                    </div>
+                </div>
+
+                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white/75">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm">
+                            <thead class="bg-slate-50/80">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock In</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock Out</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse ($attendanceHistory as $row)
+                                    @php
+                                        $statusRaw = strtolower((string) data_get($row, 'status', 'not_yet_clocked_in'));
+                                        $statusMap = [
+                                            'hadir' => ['label' => 'Checked In', 'classes' => 'bg-[#E7EFF6] text-[#063157] border-[#0B4A85]/30'],
+                                            'terlambat' => ['label' => 'Late', 'classes' => 'bg-rose-50 text-rose-700 border-rose-300'],
+                                            'pulang cepat' => ['label' => 'Early Checkout', 'classes' => 'bg-amber-50 text-amber-700 border-amber-300'],
+                                            'checked out' => ['label' => 'Checked Out', 'classes' => 'bg-slate-100 text-slate-700 border-slate-300'],
+                                        ];
+                                        $statusMeta = $statusMap[$statusRaw] ?? ['label' => ucwords($statusRaw), 'classes' => 'bg-slate-100 text-slate-700 border-slate-300'];
+                                    @endphp
+                                    <tr class="bg-white/70">
+                                        <td class="px-4 py-3 font-medium text-slate-700">
+                                            {{ data_get($row, 'tanggal') ? \Illuminate\Support\Carbon::parse(data_get($row, 'tanggal'))->format('d M Y') : '-' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-slate-600">{{ data_get($row, 'waktu_masuk', '-') }}</td>
+                                        <td class="px-4 py-3 text-slate-600">{{ data_get($row, 'waktu_keluar', '-') }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['classes'] }}">
+                                                {{ $statusMeta['label'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-9 text-center text-sm text-slate-500">
+                                            No attendance history yet. Your next check-in will appear here.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- Filter & Sorting -->
             <div class="bg-white shadow sm:rounded-lg mb-6 p-4 border border-[#0B4A85]/15">
                 <form action="{{ route('leaves.index') }}" method="GET" class="flex flex-col sm:flex-row items-center justify-between gap-4">

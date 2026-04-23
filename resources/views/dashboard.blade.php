@@ -125,11 +125,11 @@
             $attendanceRows = \App\Models\Attendance::query()
                 ->where('user_id', auth()->id())
                 ->latest('tanggal')
-                ->limit(6)
+                ->limit(3)
                 ->get();
         }
 
-        $attendanceRows = $attendanceRows->take(6);
+        $attendanceRows = $attendanceRows->take(3);
 
         $adminSummaryCards = [
             [

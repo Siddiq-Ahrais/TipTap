@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Leave;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -96,7 +97,6 @@ class LeaveController extends Controller
     {
         $user = $request->user();
 
-        // Sort by date descending and allow filtering by status
         $query = Leave::query()->where('user_id', $user->id);
 
         if ($request->filled('status')) {
@@ -105,7 +105,13 @@ class LeaveController extends Controller
 
         $history = $query->orderByDesc('created_at')->paginate(10);
 
-        return view('leave.index', compact('history'));
+        $attendanceHistory = Attendance::query()
+            ->where('user_id', $user->id)
+            ->latest('tanggal')
+            ->limit(6)
+            ->get();
+
+        return view('leave.index', compact('history', 'attendanceHistory'));
     }
 
     public function create()
