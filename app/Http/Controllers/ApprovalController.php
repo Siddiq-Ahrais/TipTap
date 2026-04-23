@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Leave;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,8 @@ class ApprovalController extends Controller
     public function index(Request $request): View
     {
         $this->ensureAdmin($request);
+
+        $clockInStats = $this->getTodayClockInStats();
 
         $settings = Setting::query()->firstOrCreate(
             ['id' => 1],
@@ -33,10 +36,36 @@ class ApprovalController extends Controller
             ->where('early_checkout_status', 'pending')
             ->count();
 
+        $pendingLeaveCount = Leave::query()
+            ->whereRaw('LOWER(status_approval) = ?', ['pending'])
+            ->count();
+
         return view('approval.index', [
             'pendingUsersCount' => $pendingUsersCount,
             'pendingEarlyCheckoutCount' => $pendingEarlyCheckoutCount,
+            'pendingLeaveCount' => $pendingLeaveCount,
+            'clockedInTodayCount' => $clockInStats['clockedInTodayCount'],
+            'totalEmployeeCount' => $clockInStats['totalEmployeeCount'],
             'settings' => $settings,
+        ]);
+    }
+
+    public function leaves(Request $request): View
+    {
+        $this->ensureAdmin($request);
+
+        $clockInStats = $this->getTodayClockInStats();
+
+        $pendingLeaves = Leave::query()
+            ->with('user:id,name,email')
+            ->whereRaw('LOWER(status_approval) = ?', ['pending'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('approval.leaves', [
+            'pendingLeaves' => $pendingLeaves,
+            'clockedInTodayCount' => $clockInStats['clockedInTodayCount'],
+            'totalEmployeeCount' => $clockInStats['totalEmployeeCount'],
         ]);
     }
 
@@ -170,6 +199,36 @@ class ApprovalController extends Controller
         return back()->with('status', 'Early checkout request rejected.');
     }
 
+    public function approveLeave(Request $request, Leave $leave): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        if (strtolower((string) $leave->status_approval) !== 'pending') {
+            return back()->withErrors(['approval' => 'This leave request is no longer pending.']);
+        }
+
+        $leave->update([
+            'status_approval' => 'Approved',
+        ]);
+
+        return back()->with('status', 'Leave request approved successfully.');
+    }
+
+    public function rejectLeave(Request $request, Leave $leave): RedirectResponse
+    {
+        $this->ensureAdmin($request);
+
+        if (strtolower((string) $leave->status_approval) !== 'pending') {
+            return back()->withErrors(['approval' => 'This leave request is no longer pending.']);
+        }
+
+        $leave->update([
+            'status_approval' => 'Rejected',
+        ]);
+
+        return back()->with('status', 'Leave request rejected.');
+    }
+
     private function ensureAdmin(Request $request): void
     {
         $role = strtolower((string) $request->user()?->role);
@@ -177,5 +236,44 @@ class ApprovalController extends Controller
         $isAdmin = in_array($role, ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
         abort_unless($isAdmin, 403);
+    }
+
+    private function getTodayClockInStats(): array
+    {
+        $adminRoles = ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'];
+
+        $totalEmployeeCount = User::query()
+            ->where('is_approved', true)
+            ->whereRaw('LOWER(COALESCE(role, ?)) NOT IN (?, ?, ?, ?, ?)', [
+                'user',
+                $adminRoles[0],
+                $adminRoles[1],
+                $adminRoles[2],
+                $adminRoles[3],
+                $adminRoles[4],
+            ])
+            ->count();
+
+        $clockedInTodayCount = Attendance::query()
+            ->whereDate('tanggal', now()->toDateString())
+            ->whereHas('user', function ($query) use ($adminRoles): void {
+                $query
+                    ->where('is_approved', true)
+                    ->whereRaw('LOWER(COALESCE(role, ?)) NOT IN (?, ?, ?, ?, ?)', [
+                        'user',
+                        $adminRoles[0],
+                        $adminRoles[1],
+                        $adminRoles[2],
+                        $adminRoles[3],
+                        $adminRoles[4],
+                    ]);
+            })
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return [
+            'clockedInTodayCount' => $clockedInTodayCount,
+            'totalEmployeeCount' => $totalEmployeeCount,
+        ];
     }
 }

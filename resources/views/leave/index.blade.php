@@ -16,7 +16,7 @@
             <h2 class="font-semibold text-xl text-navy-primary leading-tight">
                 {{ __('Leaves') }}
             </h2>
-            <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center justify-center gap-2 rounded-md border border-[#0B4A85] bg-[#0B4A85] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-[#0B4A85] focus:ring-offset-2">
+            <a href="{{ route('leaves.create') }}" class="mt-4 sm:mt-0 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2" style="background-color:#0B4A85;color:#FFFFFF;border:1px solid #0B4A85;">
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
@@ -48,16 +48,15 @@
                     </div>
 
                     @if ($todayAttendance && $earlyStatus === 'pending')
-                        <span class="inline-flex items-center rounded-full border border-[#0B4A85]/30 bg-[#E7EFF6] px-4 py-2 text-sm font-medium text-[#0B4A85]">
-                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85] animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                        <button type="button" disabled class="inline-flex cursor-not-allowed items-center justify-center rounded-md px-4 py-2 text-sm font-semibold" style="background-color:#E7EFF6;color:#0B4A85;border:1px solid rgba(11,74,133,0.35); min-width:240px;">
                             Waiting Admin Approval
-                        </span>
+                        </button>
                     @elseif ($canSubmitEarlyClockOut)
                         <form method="POST" action="{{ url('/clock-out') }}" onsubmit="return window.confirm('Are you sure you want to request early clock out?');">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="confirm_early_leave" value="1">
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md border border-[#0B4A85] bg-[#0B4A85] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-[#0B4A85] focus:ring-offset-2">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2" style="background-color:#0B4A85;color:#FFFFFF;border:1px solid #0B4A85; min-width:240px;">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                                 </svg>
@@ -65,10 +64,9 @@
                             </button>
                         </form>
                     @else
-                        <span class="inline-flex items-center rounded-full border border-[#0B4A85]/30 bg-[#E7EFF6] px-4 py-2 text-sm font-medium text-[#063157]">
-                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-[#0B4A85]" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
-                            Early clock out request unavailable
-                        </span>
+                        <button type="button" disabled class="inline-flex cursor-not-allowed items-center justify-center rounded-md px-4 py-2 text-sm font-semibold" style="background-color:#E7EFF6;color:#063157;border:1px solid rgba(11,74,133,0.35); min-width:240px;">
+                            Early clock out unavailable
+                        </button>
                     @endif
                 </div>
             </section>
