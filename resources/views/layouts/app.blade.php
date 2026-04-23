@@ -65,7 +65,7 @@
                                         @elseif (($item['icon'] ?? '') === 'document')
                                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414a2 2 0 00-.586-1.414l-2.414-2.414A2 2 0 0011.586 3H6zm2 6a1 1 0 000 2h4a1 1 0 100-2H8zm0 3a1 1 0 100 2h4a1 1 0 100-2H8z" clip-rule="evenodd" /></svg>
                                         @elseif (($item['icon'] ?? '') === 'user')
-                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a4 4 0 100 8 4 4 0 000-8z" /><path fill-rule="evenodd" d="M2 15a6 6 0 1112 0v1a1 1 0 01-1 1H3a1 1 0 01-1-1v-1z" clip-rule="evenodd" /></svg>
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7z" /><path d="M4 16a6 6 0 1112 0v1H4v-1z" /></svg>
                                         @endif
                                         <span>{{ $item['label'] }}</span>
                                     </span>
@@ -77,14 +77,14 @@
                         </nav>
 
                         @if ($sidebarBottomItems !== [])
-                            <div class="mt-5 border-t border-slate-200 pt-4">
+                            <div class="mt-5 space-y-1.5 border-t border-slate-200 pt-4">
                                 @foreach ($sidebarBottomItems as $item)
                                     <a
                                         href="{{ route($item['route']) }}"
                                         class="sidebar-link {{ request()->routeIs($item['active']) ? 'sidebar-link-active' : '' }}"
                                     >
                                         <span class="flex items-center gap-2.5">
-                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M11.49 3.17a1 1 0 00-1.98 0l-.143.87a6.992 6.992 0 00-1.173.486l-.764-.452a1 1 0 00-1.366.366l-.99 1.714a1 1 0 00.366 1.366l.764.452a7.087 7.087 0 000 .973l-.764.452a1 1 0 00-.366 1.366l.99 1.714a1 1 0 001.366.366l.764-.452c.37.204.763.367 1.173.486l.143.87a1 1 0 001.98 0l.143-.87c.41-.119.803-.282 1.173-.486l.764.452a1 1 0 001.366-.366l.99-1.714a1 1 0 00-.366-1.366l-.764-.452a7.087 7.087 0 000-.973l.764-.452a1 1 0 00.366-1.366l-.99-1.714a1 1 0 00-1.366-.366l-.764.452a6.992 6.992 0 00-1.173-.486l-.143-.87zM10.5 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" clip-rule="evenodd" /></svg>
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.19.95c.27.087.53.197.78.328l.81-.54a1 1 0 011.25.12l1.67 1.67a1 1 0 01.12 1.25l-.54.81c.13.25.24.51.33.78l.95.19a1 1 0 01.8.98v2.36a1 1 0 01-.8.98l-.95.19a5.76 5.76 0 01-.33.78l.54.81a1 1 0 01-.12 1.25l-1.67 1.67a1 1 0 01-1.25.12l-.81-.54c-.25.13-.51.24-.78.33l-.19.95a1 1 0 01-.98.8H8.82a1 1 0 01-.98-.8l-.19-.95a5.76 5.76 0 01-.78-.33l-.81.54a1 1 0 01-1.25-.12l-1.67-1.67a1 1 0 01-.12-1.25l.54-.81a5.76 5.76 0 01-.33-.78l-.95-.19a1 1 0 01-.8-.98V8.82a1 1 0 01.8-.98l.95-.19a5.76 5.76 0 01.328-.78l-.54-.81a1 1 0 01.12-1.25l1.67-1.67a1 1 0 011.25-.12l.81.54c.25-.13.51-.24.78-.33l.19-.95ZM10 13a3 3 0 100-6 3 3 0 000 6Z" clip-rule="evenodd" /></svg>
                                             <span>{{ $item['label'] }}</span>
                                         </span>
                                         <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

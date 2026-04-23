@@ -98,34 +98,5 @@
             </a>
         </section>
 
-        <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Company Settings</h3>
-            <p class="mt-1 text-sm text-slate-500">Customize allowed company email domain and office attendance timing.</p>
-
-            <form method="POST" action="{{ route('approval.settings.update') }}" class="mt-6 space-y-5">
-                @csrf
-                @method('PATCH')
-
-                <div>
-                    <label for="company_email_domain" class="mb-1.5 block text-sm font-medium text-slate-600">Company Email Domain</label>
-                    <input id="company_email_domain" name="company_email_domain" type="text" value="{{ old('company_email_domain', $settings->company_email_domain) }}" placeholder="tiptap.id" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-[#0B4A85] focus:ring-[#0B4A85]" />
-                    <p class="mt-1 text-xs text-slate-500">Employees must register with this domain, for example name@domain.com.</p>
-                </div>
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="jam_masuk_kantor" class="mb-1.5 block text-sm font-medium text-slate-600">Office Check-In Time</label>
-                        <input id="jam_masuk_kantor" name="jam_masuk_kantor" type="time" value="{{ old('jam_masuk_kantor', \Illuminate\Support\Str::of((string) $settings->jam_masuk_kantor)->substr(0, 5)) }}" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-[#0B4A85] focus:ring-[#0B4A85]" />
-                    </div>
-
-                    <div>
-                        <label for="jam_mulai_pulang" class="mb-1.5 block text-sm font-medium text-slate-600">Office Check-Out Time</label>
-                        <input id="jam_mulai_pulang" name="jam_mulai_pulang" type="time" value="{{ old('jam_mulai_pulang', \Illuminate\Support\Str::of((string) $settings->jam_mulai_pulang)->substr(0, 5)) }}" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-[#0B4A85] focus:ring-[#0B4A85]" />
-                    </div>
-                </div>
-
-                <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-[#0B4A85] px-5 py-3 font-semibold text-white transition hover:bg-[#063157]">Save Company Settings</button>
-            </form>
-        </section>
     </div>
 </x-app-layout>

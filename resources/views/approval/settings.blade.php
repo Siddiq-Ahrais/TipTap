@@ -32,8 +32,8 @@
         @endif
 
         <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 border border-[#0B4A85]/15">
-            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Attendance Time Configuration</h3>
-            <p class="mt-1 text-sm text-slate-500">Set the standard office clock-in and clock-out hours for all employees.</p>
+            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Company Settings</h3>
+            <p class="mt-1 text-sm text-slate-500">Customize allowed company email domain and office attendance timing.</p>
 
             <form method="POST" action="{{ route('approval.settings.update') }}" class="mt-6 space-y-5">
                 @csrf
