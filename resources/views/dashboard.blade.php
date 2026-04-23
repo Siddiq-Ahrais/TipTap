@@ -141,24 +141,6 @@
 
         $attendanceRows = $attendanceRows->take(6);
 
-        $quickActions = [
-            [
-                'label' => 'Request Leave',
-                'description' => 'Submit annual leave or urgent absence requests.',
-                'route' => 'leaves.create',
-            ],
-            [
-                'label' => 'Manage Posts',
-                'description' => 'Create and maintain internal post updates.',
-                'route' => 'posts.index',
-            ],
-            [
-                'label' => 'Profile',
-                'description' => 'Update your personal account information and credentials.',
-                'route' => 'profile.edit',
-            ],
-        ];
-
         $adminSummaryCards = [
             [
                 'label' => 'Present',
@@ -706,16 +688,6 @@
                 </div>
             </section>
 
-            <div class="grid gap-4 md:grid-cols-2">
-                @foreach ($quickActions as $action)
-                    @if (Route::has($action['route']))
-                        <a href="{{ route($action['route']) }}" class="card-soft rounded-3xl p-5 transition-all duration-200 hover:-translate-y-1 hover:opacity-95 hover:shadow-lg hover:shadow-slate-200/70">
-                            <p class="font-display text-lg font-semibold text-slate-900">{{ $action['label'] }}</p>
-                            <p class="mt-2 text-sm text-slate-600">{{ $action['description'] }}</p>
-                        </a>
-                    @endif
-                @endforeach
-            </div>
         </div>
     @endif
 </x-app-layout>
