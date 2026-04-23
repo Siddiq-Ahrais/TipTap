@@ -60,7 +60,7 @@
                                         <form method="POST" action="{{ route('approval.users.approve', $user) }}">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-white shadow-sm transition" style="background-color:#0B4A85;border:1px solid #0B4A85;min-width:132px;justify-content:center;">
+                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-[#0B4A85] px-4 py-2 font-medium text-white transition hover:bg-[#063157]">
                                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3.75-3.75a1 1 0 011.414-1.414l3.043 3.043 6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd" />
                                                 </svg>
@@ -71,7 +71,7 @@
                                         <form method="POST" action="{{ route('approval.users.reject', $user) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium transition" style="background-color:#FFF1F2;color:#BE123C;border:1px solid #FDA4AF;min-width:132px;justify-content:center;">
+                                            <button type="submit" class="inline-flex items-center gap-2 rounded-md border border-rose-300 px-4 py-2 font-medium text-rose-700 transition hover:bg-rose-50">
                                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                                                 </svg>
