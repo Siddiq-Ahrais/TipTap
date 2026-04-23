@@ -71,67 +71,39 @@ class AttendanceController extends Controller
             return $this->errorResponse($request, 'User has already clocked out.', 400);
         }
 
-        if ($attendance->early_checkout_status === 'pending') {
-            return $this->errorResponse($request, 'Your early checkout request is already waiting for admin approval.', 422);
-        }
+        $role = strtolower((string) $user->role);
+        $isAdmin = in_array($role, ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
-        if ($attendance->early_checkout_status === 'rejected') {
-            return $this->errorResponse($request, 'Your early checkout request was rejected by admin.', 422);
-        }
-
-        if ($attendance->early_checkout_status === 'approved') {
-            return $this->errorResponse($request, 'Your early checkout request has already been approved.', 422);
-        }
-
-        $confirmedEarlyLeave = filter_var($request->input('confirm_early_leave', false), FILTER_VALIDATE_BOOL);
-
-        if ($confirmedEarlyLeave) {
+        if ($isAdmin) {
             $attendance->update([
-                'early_checkout_status' => 'pending',
-                'early_checkout_requested_at' => $now,
+                'waktu_keluar' => $now->format('H:i:s'),
+                'early_checkout_status' => null,
+                'early_checkout_requested_at' => null,
                 'early_checkout_reviewed_at' => null,
                 'early_checkout_reviewed_by' => null,
                 'early_checkout_note' => null,
             ]);
 
-            return $this->successResponse($request, 'Early checkout request submitted. Please wait for admin approval.', 202, $attendance->fresh());
+            return $this->successResponse($request, 'Clock-out successful.', 200, $attendance->fresh());
         }
 
-        $officeCheckoutTime = Setting::query()->value('jam_mulai_pulang') ?? '17:00:00';
-        $officeCheckoutAt = Carbon::parse($today.' '.$officeCheckoutTime);
-
-        if ($now->lt($officeCheckoutAt)) {
-            return $this->errorResponse($request, 'Are you sure you want to leave early?', 422);
+        if ($attendance->early_checkout_status === 'pending') {
+            return $this->errorResponse($request, 'Your clock-out request is already waiting for admin approval.', 422);
         }
 
-        $clockInValue = $attendance->waktu_masuk;
-
-        $clockInAt = $clockInValue instanceof Carbon
-            ? $clockInValue->copy()
-            : Carbon::parse((string) $clockInValue);
-
-        $minutesWorked = max(0, $clockInAt->diffInMinutes($now, false));
-
-        if ($minutesWorked < 360) {
-            $remainingMinutes = 360 - $minutesWorked;
-
-            return $this->errorResponse(
-                $request,
-                'Clock-out is available only after 6 hours from clock-in. Remaining time: '.$remainingMinutes.' minutes.',
-                422
-            );
+        if ($attendance->early_checkout_status === 'approved') {
+            return $this->errorResponse($request, 'Your clock-out request has already been approved.', 422);
         }
 
         $attendance->update([
-            'waktu_keluar' => $now->format('H:i:s'),
-            'early_checkout_status' => null,
-            'early_checkout_requested_at' => null,
+            'early_checkout_status' => 'pending',
+            'early_checkout_requested_at' => $now,
             'early_checkout_reviewed_at' => null,
             'early_checkout_reviewed_by' => null,
             'early_checkout_note' => null,
         ]);
 
-        return $this->successResponse($request, 'Clock-out successful.', 200, $attendance->fresh());
+        return $this->successResponse($request, 'Clock-out request submitted. Please wait for admin approval.', 202, $attendance->fresh());
     }
 
     private function successResponse(Request $request, string $message, int $statusCode = 200, mixed $data = null): JsonResponse|RedirectResponse

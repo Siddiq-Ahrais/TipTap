@@ -47,6 +47,8 @@
         ];
 
         $statusKey = $statusAliases[$normalizedStatus] ?? 'not_yet_clocked_in';
+        $authRole = strtolower((string) auth()->user()?->role);
+        $isAdminActor = in_array($authRole, ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
         $statusMeta = [
             'checked_in' => [
@@ -86,24 +88,12 @@
         $canClockIn = in_array($statusKey, ['not_yet_clocked_in', 'absent'], true);
         $canAttemptClockOut = in_array($statusKey, ['checked_in', 'late'], true);
 
-        $clockOutMinimumMinutes = 360;
-        $clockInTimeValue = data_get($todayAttendanceRecord, 'waktu_masuk');
-        $clockInAt = null;
-
-        if ($clockInTimeValue instanceof \Illuminate\Support\Carbon) {
-            $clockInAt = $clockInTimeValue->copy();
-        } elseif (! empty($clockInTimeValue)) {
-            $clockInAt = \Illuminate\Support\Carbon::parse((string) $clockInTimeValue);
-        }
+        $requiresClockOutApproval = ! $isAdminActor;
+        $canClockOut = $canAttemptClockOut;
+        $canRequestEarlyClockOut = $canAttemptClockOut && $requiresClockOutApproval;
 
         $officeCheckIn = old('office_check_in', data_get($globalSettings ?? [], 'office_check_in', data_get($settings ?? [], 'office_check_in', '08:00')));
         $officeCheckOut = old('office_check_out', data_get($globalSettings ?? [], 'office_check_out', data_get($settings ?? [], 'office_check_out', '17:00')));
-
-        $minutesSinceClockIn = $clockInAt ? max(0, $clockInAt->diffInMinutes(now(), false)) : 0;
-        $remainingClockOutMinutes = $canAttemptClockOut ? max(0, $clockOutMinimumMinutes - $minutesSinceClockIn) : 0;
-        $canClockOut = $canAttemptClockOut && $remainingClockOutMinutes === 0;
-        $officeCheckoutAt = \Illuminate\Support\Carbon::parse(now()->toDateString().' '.$officeCheckOut.':00');
-        $canRequestEarlyClockOut = $canAttemptClockOut && now()->lt($officeCheckoutAt);
 
         $metricCards = $metrics ?? [
             [
@@ -562,16 +552,13 @@
                             <form
                                 method="POST"
                                 action="{{ url('/clock-out') }}"
-                                x-data="{ loading: false, earlyConfirmed: false }"
+                                x-ref="clockOutForm"
+                                x-data="{ loading: false, showConfirmModal: false, confirmed: false }"
                                 @submit.prevent="
-                                    if (loading || {{ ($canClockOut || $canRequestEarlyClockOut) ? 'false' : 'true' }}) return;
-                                    const [endHour, endMinute] = '{{ $officeCheckOut }}'.split(':').map(Number);
-                                    const nowTime = new Date();
-                                    const cutoffTime = new Date();
-                                    cutoffTime.setHours(endHour, endMinute || 0, 0, 0);
-                                    if (nowTime < cutoffTime && !earlyConfirmed) {
-                                        if (!window.confirm('are you sure want to leave early?')) return;
-                                        earlyConfirmed = true;
+                                    if (loading || {{ $canAttemptClockOut ? 'false' : 'true' }}) return;
+                                    if (!confirmed) {
+                                        showConfirmModal = true;
+                                        return;
                                     }
                                     loading = true;
                                     $el.submit();
@@ -579,24 +566,71 @@
                             >
                                 @csrf
                                 @method('PUT')
-                                <input type="hidden" name="confirm_early_leave" :value="earlyConfirmed ? 1 : 0">
                                 <button
                                     type="submit"
-                                    :disabled="loading || {{ ($canClockOut || $canRequestEarlyClockOut) ? 'false' : 'true' }}"
-                                    class="inline-flex w-full items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2 {{ ($canClockOut || $canRequestEarlyClockOut) ? 'border-[#0B4A85] hover:scale-[1.02]' : 'cursor-not-allowed border-slate-400 bg-slate-400' }}"
-                                    style="{{ ($canClockOut || $canRequestEarlyClockOut) ? 'background-color: #0B4A85; color: #FFFFFF;' : '' }}"
+                                    :disabled="loading || {{ $canAttemptClockOut ? 'false' : 'true' }}"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2 {{ $canAttemptClockOut ? 'border-[#0B4A85] hover:scale-[1.02]' : 'cursor-not-allowed border-slate-400 bg-slate-400' }}"
+                                    style="{{ $canAttemptClockOut ? 'background-color: #0B4A85; color: #FFFFFF;' : '' }}"
                                 >
                                     <span x-show="!loading" class="inline-block">
-                                        {{ $canRequestEarlyClockOut ? 'Request Early Clock Out' : ($canClockOut ? 'Clock Out' : 'Clock Out (Locked)') }}
+                                        {{ $requiresClockOutApproval ? 'Request Clock Out' : 'Clock Out' }}
                                     </span>
                                     <span x-cloak x-show="loading" class="inline-flex items-center gap-2" style="display: none;">
                                         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="4" />
                                             <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
                                         </svg>
-                                        {{ $canRequestEarlyClockOut ? 'Submitting Request' : 'Processing' }}
+                                        {{ $requiresClockOutApproval ? 'Submitting Request' : 'Processing' }}
                                     </span>
                                 </button>
+
+                                <div
+                                    x-cloak
+                                    x-show="showConfirmModal"
+                                    x-transition.opacity
+                                    class="fixed inset-0 z-[70] flex items-center justify-center bg-[#031936]/60 p-4 backdrop-blur-sm"
+                                >
+                                    <div
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="w-full max-w-md overflow-hidden rounded-3xl border border-[#0B4A85]/25 bg-white shadow-[0_24px_60px_rgba(3,25,54,0.35)]"
+                                        @click.away="showConfirmModal = false; confirmed = false"
+                                    >
+                                        <div class="bg-gradient-to-r from-[#0B4A85] to-[#0E5AA6] px-6 py-4 text-white">
+                                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Clock Out Confirmation</p>
+                                            <h4 class="mt-1 font-display text-xl font-semibold">Are you sure want to clock out?</h4>
+                                        </div>
+
+                                        <div class="space-y-6 px-6 py-5">
+                                            <p class="text-sm leading-6 text-slate-600">
+                                                {{ $requiresClockOutApproval
+                                                    ? 'This action will send your clock-out request to admin for approval.'
+                                                    : 'Your attendance will be closed immediately for today.' }}
+                                            </p>
+
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                                    @click="showConfirmModal = false; confirmed = false"
+                                                >
+                                                    No
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex items-center justify-center rounded-xl border border-[#0B4A85] bg-[#0B4A85] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#083765]"
+                                                    @click="confirmed = true; showConfirmModal = false; $nextTick(() => $refs.clockOutForm.requestSubmit())"
+                                                >
+                                                    Yes
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </form>
                         @elseif ($statusKey === 'pending')
                             <button
@@ -619,11 +653,11 @@
 
                     <p class="mt-3 text-xs text-slate-500">
                         @if ($statusKey === 'pending')
-                            Your early clock-out request has been submitted and is waiting for admin decision.
-                        @elseif ($canRequestEarlyClockOut)
-                            You can submit an early clock-out request now. Admin approval is required before leaving.
-                        @elseif ($canAttemptClockOut && ! $canClockOut)
-                            Clock Out becomes available after 6 hours from your clock-in. Remaining: {{ $remainingClockOutMinutes }} minutes.
+                            Your clock-out request has been submitted and is waiting for admin decision.
+                        @elseif ($canAttemptClockOut && $requiresClockOutApproval)
+                            You can request clock-out anytime. Admin approval is required before leaving.
+                        @elseif ($canAttemptClockOut)
+                            As admin, you can clock out anytime after confirmation.
                         @else
                             Button state is rendered dynamically using Blade status checks.
                         @endif
