@@ -13,8 +13,9 @@ export default {
         extend: {
             colors: {
                 'navy-primary': '#0B4A85',
-                'navy-dark': '#063157',
+                'navy-dark': '#072C50',
                 'navy-light': '#E7EFF6',
+                'doodle-color': '#11A582',
                 'dark-slate': '#2D3748',
             },
             fontFamily: {

@@ -10,7 +10,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-slate-50 text-dark-slate antialiased">
+    <body class="bg-[#072C50] text-dark-slate antialiased">
         @php
             $isAdminNavigation = in_array(strtolower((string) auth()->user()?->role), ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
@@ -28,7 +28,7 @@
             ));
         @endphp
 
-        <div class="relative min-h-screen overflow-x-clip">
+        <div class="workspace-shell relative min-h-screen overflow-x-clip">
 
             @include('layouts.navigation')
 

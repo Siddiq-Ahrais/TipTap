@@ -7,14 +7,15 @@
 @layer base {
 	:root {
 		--navy-primary: 11 74 133;
-		--navy-dark: 6 49 87;
+		--navy-dark: 7 44 80;
 		--navy-light: 231 239 246;
+		--doodle-color: 17 165 130;
 		--dark-slate: 45 55 72;
 	}
 
 	body {
 		font-family: 'DM Sans', sans-serif;
-		@apply antialiased bg-slate-50;
+		@apply antialiased bg-[#072C50];
 		color: #2D3748;
 	}
 
@@ -31,6 +32,16 @@
 	[x-cloak] {
 		display: none !important;
 	}
+
+	.workspace-shell {
+		background-color: rgb(var(--navy-dark));
+		background-image:
+			linear-gradient(170deg, rgba(7, 44, 80, 0.96), rgba(5, 34, 63, 0.98)),
+			url('../images/patterns/workplace-doodle.svg');
+		background-repeat: repeat;
+		background-size: auto, 220px 220px;
+		background-attachment: fixed;
+	}
 }
 
 @layer components {
@@ -40,7 +51,7 @@
 
 	.card-soft {
 		@apply border border-slate-200 bg-white;
-		box-shadow: 0 16px 32px -24px rgba(148, 163, 184, 0.65);
+		box-shadow: 0 24px 44px -30px rgba(2, 12, 27, 0.78), 0 12px 22px -18px rgba(6, 19, 36, 0.65);
 	}
 
 	.auth-scene {

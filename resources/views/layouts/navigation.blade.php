@@ -14,7 +14,7 @@
     ));
 @endphp
 
-<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-[#0A3E71] bg-navy-primary/95 backdrop-blur">
     <div class="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
             <a href="{{ route('dashboard') }}" class="grid h-10 w-10 place-items-center rounded-2xl bg-navy-primary text-white shadow-lg shadow-navy-primary/35">
@@ -25,15 +25,15 @@
             </a>
 
             <div>
-                <p class="font-display text-sm font-extrabold tracking-tight text-navy-primary">{{ config('app.name', 'TipTap') }}</p>
-                <p class="text-xs text-dark-slate/70">Employee Workspace</p>
+                <p class="font-display text-sm font-extrabold tracking-tight text-white">{{ config('app.name', 'TipTap') }}</p>
+                <p class="text-xs text-slate-100/85">Employee Workspace</p>
             </div>
         </div>
 
         <div class="hidden items-center gap-3 md:flex">
             <x-dropdown align="right" width="56">
                 <x-slot name="trigger">
-                    <button class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-dark-slate transition hover:border-[#0B4A85]/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/30">
+                    <button class="inline-flex items-center gap-2 rounded-xl border border-[#95B5D3]/55 bg-white/95 px-3 py-2 text-sm font-medium text-dark-slate transition hover:border-white hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-white/35">
                         <span class="inline-grid h-7 w-7 place-items-center rounded-lg bg-[#E7EFF6] text-[#0B4A85]">
                             {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                         </span>
@@ -64,7 +64,7 @@
 
         <button
             @click="open = !open"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-dark-slate/80 transition hover:border-[#0B4A85]/40 hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/30 md:hidden"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#95B5D3]/55 bg-white/95 text-dark-slate/80 transition hover:border-white hover:text-navy-primary focus:outline-none focus:ring-2 focus:ring-white/35 md:hidden"
         >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                 <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
