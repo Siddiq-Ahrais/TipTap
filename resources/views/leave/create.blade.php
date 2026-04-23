@@ -138,7 +138,7 @@
                             <a href="{{ route('leaves.index') }}" class="bg-white py-2 px-4 border border-[#0B4A85] rounded-md shadow-sm text-sm font-medium text-[#0B4A85] hover:bg-[#E7EFF6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] mr-3 transition-colors">
                                 Cancel
                             </a>
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#0B4A85] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] transition-all duration-200 hover:-translate-y-0.5">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#0B4A85] hover:bg-[#063157] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4A85] transition-all duration-200 hover:-translate-y-0.5" style="background-color: #0B4A85; color: #FFFFFF;">
                                 Submit Request
                             </button>
                         </div>
