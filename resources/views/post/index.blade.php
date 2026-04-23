@@ -1,18 +1,29 @@
 <x-app-layout>
+    @php
+        $role = strtolower((string) auth()->user()?->role);
+        $isAdminPostManager = in_array($role, ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
+    @endphp
+
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-xl text-navy-primary leading-tight">
                     {{ __('Data Post') }}
                 </h2>
-                <p class="mt-1 text-sm text-gray-600">Kelola semua postingan dengan tampilan yang rapi.</p>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ $isAdminPostManager
+                        ? 'Kelola semua postingan dengan tampilan yang rapi.'
+                        : 'Baca pengumuman dan postingan terbaru dari admin.' }}
+                </p>
             </div>
 
-            <a href="{{ route('posts.create') }}"
-               class="inline-flex items-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
-               style="background-color:#0B4A85;color:#FFFFFF;border:1px solid #0B4A85;">
-                + Tambah Post
-            </a>
+            @if ($isAdminPostManager)
+                <a href="{{ route('posts.create') }}"
+                   class="inline-flex items-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                   style="background-color:#0B4A85;color:#FFFFFF;border:1px solid #0B4A85;">
+                    + Tambah Post
+                </a>
+            @endif
         </div>
     </x-slot>
 
@@ -32,21 +43,23 @@
                             <p class="mt-2 text-sm leading-6 text-gray-600">{{ $post->deskripsi }}</p>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('posts.edit', $post) }}"
-                               class="inline-flex items-center rounded-md border border-yellow-500 px-3 py-2 text-xs font-semibold text-yellow-600 hover:bg-yellow-50 transition">
-                                Edit
-                            </a>
+                        @if ($isAdminPostManager)
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('posts.edit', $post) }}"
+                                   class="inline-flex items-center rounded-md border border-yellow-500 px-3 py-2 text-xs font-semibold text-yellow-600 hover:bg-yellow-50 transition">
+                                    Edit
+                                </a>
 
-                            <form action="{{ route('posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus post ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                        class="inline-flex items-center rounded-md border border-red-500 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
+                                <form action="{{ route('posts.destroy', $post) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus post ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="inline-flex items-center rounded-md border border-red-500 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty
