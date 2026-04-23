@@ -17,6 +17,25 @@
     </x-slot>
 
     <div class="space-y-6">
+        @php
+            $monthOptions = [
+                ['value' => '01', 'label' => 'Jan'],
+                ['value' => '02', 'label' => 'Feb'],
+                ['value' => '03', 'label' => 'Mar'],
+                ['value' => '04', 'label' => 'Apr'],
+                ['value' => '05', 'label' => 'May'],
+                ['value' => '06', 'label' => 'Jun'],
+                ['value' => '07', 'label' => 'Jul'],
+                ['value' => '08', 'label' => 'Aug'],
+                ['value' => '09', 'label' => 'Sep'],
+                ['value' => '10', 'label' => 'Oct'],
+                ['value' => '11', 'label' => 'Nov'],
+                ['value' => '12', 'label' => 'Dec'],
+            ];
+            $currentYear = (int) now()->format('Y');
+            $yearOptions = [$currentYear - 1, $currentYear, $currentYear + 1];
+        @endphp
+
         @if (session('status'))
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                 {{ session('status') }}
@@ -30,6 +49,37 @@
                 @endforeach
             </div>
         @endif
+
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div class="w-full lg:max-w-sm">
+                    <label for="search_users" class="sr-only">Search users</label>
+                    <input id="search_users" type="text" placeholder="Search employee name or email..." class="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20" />
+                </div>
+
+                <div class="flex gap-3 items-center lg:justify-end">
+                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md px-3 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
+                        @foreach ($monthOptions as $month)
+                            <option value="{{ $month['value'] }}" @selected($month['value'] === now()->format('m'))>{{ $month['label'] }}</option>
+                        @endforeach
+                    </select>
+
+                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md px-3 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
+                        @foreach ($yearOptions as $year)
+                            <option value="{{ $year }}" @selected($year === $currentYear)>{{ $year }}</option>
+                        @endforeach
+                    </select>
+
+                    <button type="button" class="bg-[#0B4A85] hover:bg-blue-900 text-white font-medium rounded-md text-sm px-4 py-2 flex items-center gap-2 transition">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
+                            <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10V1.5z" />
+                        </svg>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <header class="bg-[#0B4A85] text-white">

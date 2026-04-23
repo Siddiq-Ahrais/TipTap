@@ -4,6 +4,8 @@
     $navItems = [
         ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
         ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation],
+        ['label' => __('Leave Requests'), 'route' => 'approval.leaves.index', 'active' => 'approval.leaves.*', 'visible' => $isAdminNavigation],
+        ['label' => __('System Config'), 'route' => 'approval.settings.index', 'active' => 'approval.settings.*', 'visible' => $isAdminNavigation],
         ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*'],
         ['label' => __('Posts'), 'route' => 'posts.index', 'active' => 'posts.*'],
     ];

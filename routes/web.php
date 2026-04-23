@@ -31,6 +31,7 @@ Route::middleware(['auth', 'approved'])->group(function (): void {
 
 	Route::prefix('approval')->name('approval.')->group(function (): void {
 		Route::get('/', [ApprovalController::class, 'index'])->name('index');
+		Route::get('/settings', [ApprovalController::class, 'settings'])->name('settings.index');
 		Route::get('/registrations', [ApprovalController::class, 'registrations'])->name('registrations.index');
 		Route::get('/early-checkouts', [ApprovalController::class, 'earlyCheckouts'])->name('early-checkouts.index');
 		Route::get('/leaves', [ApprovalController::class, 'leaves'])->name('leaves.index');

@@ -147,24 +147,28 @@
                 'value' => data_get($adminSummary ?? [], 'present', data_get($stats ?? [], 'present', 128)),
                 'helper' => 'Employees clocked in this month',
                 'icon' => 'check',
+                'accent' => 'border-[#11A582]',
             ],
             [
                 'label' => 'Late',
                 'value' => data_get($adminSummary ?? [], 'late', data_get($stats ?? [], 'late', 17)),
                 'helper' => 'Late arrivals this month',
                 'icon' => 'clock',
+                'accent' => 'border-[#FF6B6B]',
             ],
             [
                 'label' => 'On Leave',
                 'value' => data_get($adminSummary ?? [], 'on_leave', data_get($stats ?? [], 'on_leave', 9)),
                 'helper' => 'Approved leave records',
                 'icon' => 'calendar',
+                'accent' => 'border-[#FBB117]',
             ],
             [
                 'label' => 'Absent',
                 'value' => data_get($adminSummary ?? [], 'absent', data_get($stats ?? [], 'absent', 5)),
                 'helper' => 'Unexcused attendance gaps',
                 'icon' => 'warning',
+                'accent' => 'border-gray-500',
             ],
         ];
 
@@ -285,9 +289,9 @@
                 </div>
             </section>
 
-            <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 bg-slate-50 rounded-2xl p-2">
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach ($adminSummaryCards as $card)
-                    <article class="relative overflow-hidden bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-[#0B4A85] p-6">
+                    <article class="relative overflow-hidden bg-white shadow-sm rounded-xl p-6 border border-gray-100 border-l-4 {{ $card['accent'] }}">
                         <div class="absolute right-4 top-4 rounded-full bg-[#0B4A85]/10 p-3 text-[#0B4A85]/35">
                             @if ($card['icon'] === 'check')
                                 <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

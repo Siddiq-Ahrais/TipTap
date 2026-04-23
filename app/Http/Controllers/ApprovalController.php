@@ -83,6 +83,24 @@ class ApprovalController extends Controller
         ]);
     }
 
+    public function settings(Request $request): View
+    {
+        $this->ensureAdmin($request);
+
+        $settings = Setting::query()->firstOrCreate(
+            ['id' => 1],
+            [
+                'jam_masuk_kantor' => '08:00',
+                'jam_mulai_pulang' => '17:00',
+                'company_email_domain' => (string) config('app.company_email_domain', 'tiptap.id'),
+            ]
+        );
+
+        return view('approval.settings', [
+            'settings' => $settings,
+        ]);
+    }
+
     public function earlyCheckouts(Request $request): View
     {
         $this->ensureAdmin($request);
