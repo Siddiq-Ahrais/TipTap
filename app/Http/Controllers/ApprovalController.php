@@ -40,6 +40,12 @@ class ApprovalController extends Controller
             ->whereRaw('LOWER(status_approval) = ?', ['pending'])
             ->count();
 
+        $todayAttendances = Attendance::query()
+            ->with('user:id,name,email,role,divisi')
+            ->whereDate('tanggal', now()->toDateString())
+            ->orderBy('waktu_masuk', 'asc')
+            ->get();
+
         return view('approval.index', [
             'pendingUsersCount' => $pendingUsersCount,
             'pendingEarlyCheckoutCount' => $pendingEarlyCheckoutCount,
@@ -47,6 +53,7 @@ class ApprovalController extends Controller
             'clockedInTodayCount' => $clockInStats['clockedInTodayCount'],
             'totalEmployeeCount' => $clockInStats['totalEmployeeCount'],
             'settings' => $settings,
+            'todayAttendances' => $todayAttendances,
         ]);
     }
 
