@@ -105,13 +105,7 @@ class LeaveController extends Controller
 
         $history = $query->orderByDesc('created_at')->paginate(10);
 
-        $attendanceHistory = Attendance::query()
-            ->where('user_id', $user->id)
-            ->latest('tanggal')
-            ->limit(6)
-            ->get();
-
-        return view('leave.index', compact('history', 'attendanceHistory'));
+        return view('leave.index', compact('history'));
     }
 
     public function create()

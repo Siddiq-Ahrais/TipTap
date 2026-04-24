@@ -1,15 +1,4 @@
 <x-app-layout>
-    @php
-        $todayAttendance = \App\Models\Attendance::query()
-            ->where('user_id', auth()->id())
-            ->whereDate('tanggal', now()->toDateString())
-            ->first();
-
-        $earlyStatus = strtolower((string) data_get($todayAttendance, 'early_checkout_status'));
-        $canSubmitEarlyClockOut = $todayAttendance
-            && ! data_get($todayAttendance, 'waktu_keluar')
-            && ! in_array($earlyStatus, ['pending', 'approved'], true);
-    @endphp
 
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -38,94 +27,7 @@
                 </div>
             @endif
 
-            <section class="bg-white shadow sm:rounded-lg mb-6 p-6 border border-[#0B4A85]/15">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Attendance Menu</p>
-                        <h3 class="mt-1 text-xl font-semibold text-navy-primary">Request Early Clock Out</h3>
-                        <p class="mt-1 text-sm text-gray-500">Submit request to admin if you need to clock out before office check-out time.</p>
-                    </div>
 
-                    @if ($todayAttendance && $earlyStatus === 'pending')
-                        <button type="button" disabled class="inline-flex cursor-not-allowed items-center justify-center rounded-md px-4 py-2 text-sm font-semibold" style="background-color:#E7EFF6;color:#0B4A85;border:1px solid rgba(11,74,133,0.35); min-width:240px;">
-                            Waiting Admin Approval
-                        </button>
-                    @elseif ($canSubmitEarlyClockOut)
-                        <form method="POST" action="{{ url('/clock-out') }}" onsubmit="return window.confirm('Are you sure you want to request early clock out?');">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="confirm_early_leave" value="1">
-                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2" style="background-color:#0B4A85;color:#FFFFFF;border:1px solid #0B4A85; min-width:240px;">
-                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                Submit Early Clock Out
-                            </button>
-                        </form>
-                    @else
-                        <button type="button" disabled class="inline-flex cursor-not-allowed items-center justify-center rounded-md px-4 py-2 text-sm font-semibold" style="background-color:#E7EFF6;color:#063157;border:1px solid rgba(11,74,133,0.35); min-width:240px;">
-                            Early clock out unavailable
-                        </button>
-                    @endif
-                </div>
-            </section>
-
-            <section class="bg-white shadow sm:rounded-lg mb-6 p-6 border border-[#0B4A85]/15">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Attendance History</p>
-                        <h3 class="mt-1 text-xl font-semibold text-navy-primary">Recent Attendance History</h3>
-                        <p class="mt-1 text-sm text-gray-500">Latest attendance records from your dashboard timeline.</p>
-                    </div>
-                </div>
-
-                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white/75">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm">
-                            <thead class="bg-slate-50/80">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock In</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock Out</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @forelse ($attendanceHistory as $row)
-                                    @php
-                                        $statusRaw = strtolower((string) data_get($row, 'status', 'not_yet_clocked_in'));
-                                        $statusMap = [
-                                            'hadir' => ['label' => 'Checked In', 'classes' => 'bg-[#E7EFF6] text-[#063157] border-[#0B4A85]/30'],
-                                            'terlambat' => ['label' => 'Late', 'classes' => 'bg-rose-50 text-rose-700 border-rose-300'],
-                                            'pulang cepat' => ['label' => 'Early Checkout', 'classes' => 'bg-amber-50 text-amber-700 border-amber-300'],
-                                            'checked out' => ['label' => 'Checked Out', 'classes' => 'bg-slate-100 text-slate-700 border-slate-300'],
-                                        ];
-                                        $statusMeta = $statusMap[$statusRaw] ?? ['label' => ucwords($statusRaw), 'classes' => 'bg-slate-100 text-slate-700 border-slate-300'];
-                                    @endphp
-                                    <tr class="bg-white/70">
-                                        <td class="px-4 py-3 font-medium text-slate-700">
-                                            {{ data_get($row, 'tanggal') ? \Illuminate\Support\Carbon::parse(data_get($row, 'tanggal'))->format('d M Y') : '-' }}
-                                        </td>
-                                        <td class="px-4 py-3 text-slate-600">{{ data_get($row, 'waktu_masuk', '-') }}</td>
-                                        <td class="px-4 py-3 text-slate-600">{{ data_get($row, 'waktu_keluar', '-') }}</td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['classes'] }}">
-                                                {{ $statusMeta['label'] }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-9 text-center text-sm text-slate-500">
-                                            No attendance history yet. Your next check-in will appear here.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
 
             <!-- Filter & Sorting -->
             <div class="bg-white shadow sm:rounded-lg mb-6 p-4 border border-[#0B4A85]/15">
