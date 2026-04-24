@@ -119,14 +119,15 @@
         <div
             x-cloak
             x-show="reviewOpen && selected"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             role="dialog"
             aria-modal="true"
+            @click.self="reviewOpen = false"
         >
-            <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div class="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-white shadow-xl overflow-hidden">
+                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3 shrink-0">
                     <div>
-                        <h3 class="font-display text-xl font-semibold text-slate-900">Review Leave Request</h3>
+                        <h3 class="font-display text-lg font-semibold text-slate-900">Review Leave Request</h3>
                         <p class="text-sm text-slate-500" x-text="selected?.employeeName"></p>
                     </div>
                     <button type="button" @click="reviewOpen = false" class="rounded-md p-2 text-slate-500 hover:bg-slate-100">
@@ -136,13 +137,13 @@
                     </button>
                 </div>
 
-                <div class="space-y-5 px-6 py-5">
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div class="space-y-4 px-5 py-4 overflow-y-auto flex-1">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
                             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Type</p>
                             <p class="mt-1 text-sm font-semibold text-slate-800" x-text="selected?.type"></p>
                         </div>
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
                             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date</p>
                             <p class="mt-1 text-sm font-semibold text-slate-800" x-text="selected?.date"></p>
                         </div>
@@ -150,14 +151,14 @@
 
                     <div>
                         <p class="text-sm font-semibold text-slate-700">Reason</p>
-                        <p class="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 whitespace-pre-wrap" x-text="selected?.reason"></p>
+                        <p class="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap" x-text="selected?.reason"></p>
                     </div>
 
                     <div>
                         <p class="text-sm font-semibold text-slate-700">Medical Certificate / Attachment</p>
-                        <div class="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <div class="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
                             <template x-if="selected?.attachmentUrl && selected?.attachmentIsImage">
-                                <img :src="selected?.attachmentUrl" alt="Medical certificate" class="max-h-72 rounded-md border border-slate-200 object-contain" />
+                                <img :src="selected?.attachmentUrl" alt="Medical certificate" class="w-full max-h-64 rounded-md border border-slate-200 object-contain" />
                             </template>
 
                             <template x-if="selected?.attachmentUrl && !selected?.attachmentIsImage">
@@ -171,12 +172,12 @@
                     </div>
 
                     <div>
-                        <label for="admin_note" class="mb-1.5 block text-sm font-medium text-slate-700">Admin Notes (optional)</label>
-                        <textarea id="admin_note" x-ref="adminNote" rows="4" placeholder="Add optional notes (for example: reason for rejection)..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0B4A85]"></textarea>
+                        <label for="admin_note" class="mb-1 block text-sm font-medium text-slate-700">Admin Notes (optional)</label>
+                        <textarea id="admin_note" x-ref="adminNote" rows="3" placeholder="Add optional notes (for example: reason for rejection)..." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0B4A85]"></textarea>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
+                <div class="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 px-5 py-3 shrink-0">
                     <form method="POST" :action="'{{ route('approval.leaves.approve', ['leave' => '__ID__']) }}'.replace('__ID__', selected?.id ?? '')">
                         @csrf
                         @method('PATCH')
