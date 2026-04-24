@@ -69,14 +69,6 @@
                             <option value="{{ $year }}" @selected($year === $currentYear)>{{ $year }}</option>
                         @endforeach
                     </select>
-
-                    <button type="button" class="bg-[#0B4A85] hover:bg-blue-900 text-white font-medium rounded-md text-sm px-4 py-2 flex items-center gap-2 transition">
-                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
-                            <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10V1.5z" />
-                        </svg>
-                        Export CSV
-                    </button>
                 </div>
             </div>
         </section>

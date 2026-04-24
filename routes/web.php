@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceExportController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'approved'])->group(function (): void {
 		Route::patch('/leaves/{leave}/approve', [ApprovalController::class, 'approveLeave'])->name('leaves.approve');
 		Route::patch('/leaves/{leave}/reject', [ApprovalController::class, 'rejectLeave'])->name('leaves.reject');
 		Route::patch('/settings', [ApprovalController::class, 'updateSettings'])->name('settings.update');
+		Route::get('/attendance/export', [AttendanceExportController::class, 'export'])->name('attendance.export');
 	});
 
 	Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');

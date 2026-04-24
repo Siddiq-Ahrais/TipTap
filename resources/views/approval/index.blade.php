@@ -164,6 +164,40 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Export Downloads --}}
+            <div class="flex flex-col gap-3 px-5 py-4 border-t border-slate-200 bg-slate-50/40 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-700">Download Attendance Report</p>
+                    <p class="text-xs text-slate-500">Export records as Excel file (.xls)</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('approval.attendance.export', ['period' => 'today']) }}"
+                       class="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
+                            <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10V1.5z" />
+                        </svg>
+                        Today
+                    </a>
+                    <a href="{{ route('approval.attendance.export', ['period' => 'weekly']) }}"
+                       class="inline-flex items-center gap-2 rounded-lg border border-[#0B4A85]/30 bg-[#0B4A85]/5 px-4 py-2 text-xs font-semibold text-[#0B4A85] transition hover:bg-[#0B4A85]/10">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
+                            <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10V1.5z" />
+                        </svg>
+                        This Week
+                    </a>
+                    <a href="{{ route('approval.attendance.export', ['period' => 'monthly', 'month' => now()->format('m'), 'year' => now()->format('Y')]) }}"
+                       class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
+                            <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L9 10V1.5z" />
+                        </svg>
+                        This Month
+                    </a>
+                </div>
+            </div>
         </section>
 
         <section class="grid gap-5 lg:grid-cols-3">
