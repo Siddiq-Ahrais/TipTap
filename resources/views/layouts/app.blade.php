@@ -17,7 +17,6 @@
             $sidebarItems = [
                 ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
                 ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.index', 'visible' => $isAdminNavigation, 'icon' => 'shield'],
-                ['label' => __('Leave Requests'), 'route' => 'approval.leaves.index', 'active' => 'approval.leaves.*', 'visible' => $isAdminNavigation, 'icon' => 'clipboard'],
                 ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*', 'icon' => 'calendar'],
                 ['label' => __('Posts'), 'route' => 'posts.index', 'active' => 'posts.*', 'icon' => 'document'],
                 ['label' => __('Profile'), 'route' => 'profile.edit', 'active' => 'profile.*', 'icon' => 'user'],
