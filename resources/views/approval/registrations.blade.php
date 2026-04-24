@@ -58,13 +58,13 @@
                 </div>
 
                 <div class="flex gap-3 items-center lg:justify-end">
-                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md px-3 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
+                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md pl-3 pr-8 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
                         @foreach ($monthOptions as $month)
                             <option value="{{ $month['value'] }}" @selected($month['value'] === now()->format('m'))>{{ $month['label'] }}</option>
                         @endforeach
                     </select>
 
-                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md px-3 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
+                    <select class="bg-gray-50 border border-gray-200 text-sm rounded-md pl-3 pr-8 py-2 text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20">
                         @foreach ($yearOptions as $year)
                             <option value="{{ $year }}" @selected($year === $currentYear)>{{ $year }}</option>
                         @endforeach
