@@ -43,8 +43,9 @@ class ApprovalController extends Controller
         $todayAttendances = Attendance::query()
             ->with('user:id,name,email,role,divisi')
             ->whereDate('tanggal', now()->toDateString())
+            ->whereNotNull('waktu_masuk')
             ->orderBy('waktu_masuk', 'asc')
-            ->paginate(10);
+            ->paginate(5);
 
         return view('approval.index', [
             'pendingUsersCount' => $pendingUsersCount,
@@ -265,34 +266,13 @@ class ApprovalController extends Controller
 
     private function getTodayClockInStats(): array
     {
-        $adminRoles = ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'];
-
         $totalEmployeeCount = User::query()
             ->where('is_approved', true)
-            ->whereRaw('LOWER(COALESCE(role, ?)) NOT IN (?, ?, ?, ?, ?)', [
-                'user',
-                $adminRoles[0],
-                $adminRoles[1],
-                $adminRoles[2],
-                $adminRoles[3],
-                $adminRoles[4],
-            ])
             ->count();
 
         $clockedInTodayCount = Attendance::query()
             ->whereDate('tanggal', now()->toDateString())
-            ->whereHas('user', function ($query) use ($adminRoles): void {
-                $query
-                    ->where('is_approved', true)
-                    ->whereRaw('LOWER(COALESCE(role, ?)) NOT IN (?, ?, ?, ?, ?)', [
-                        'user',
-                        $adminRoles[0],
-                        $adminRoles[1],
-                        $adminRoles[2],
-                        $adminRoles[3],
-                        $adminRoles[4],
-                    ]);
-            })
+            ->whereNotNull('waktu_masuk')
             ->distinct('user_id')
             ->count('user_id');
 

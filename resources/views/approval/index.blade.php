@@ -32,7 +32,7 @@
                 <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h3 class="font-display text-lg font-semibold">Today's Attendance</h3>
-                        <p class="text-sm text-white/85">{{ $clockedInTodayCount }}/{{ $totalEmployeeCount }} employees clocked in &middot; ranked by earliest clock-in time</p>
+                        <p class="text-sm text-white/85">{{ $todayAttendances->total() }}/{{ $totalEmployeeCount }} employees clocked in &middot; ranked by earliest clock-in time</p>
                     </div>
                     <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                         {{ $todayAttendances->total() }} {{ Str::plural('record', $todayAttendances->total()) }}
@@ -44,7 +44,7 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">#</th>
+                            <th class="w-16 px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.14em]">No</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Employee ID</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Name</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Clock In</th>
@@ -86,15 +86,15 @@
                             @endphp
 
                             <tr class="hover:bg-slate-50/80 transition-colors {{ $globalIndex === 0 ? 'bg-emerald-50/40' : '' }}">
-                                <td class="px-4 py-3 font-semibold text-slate-500">
+                                <td class="w-16 px-4 py-3 text-center font-semibold text-slate-500">
                                     @if ($globalIndex === 0)
-                                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-white" title="Fastest clock-in">🥇</span>
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-sm" title="Fastest clock-in">🥇</span>
                                     @elseif ($globalIndex === 1)
-                                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white" title="2nd fastest">🥈</span>
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-sm" title="2nd fastest">🥈</span>
                                     @elseif ($globalIndex === 2)
-                                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white" title="3rd fastest">🥉</span>
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-sm" title="3rd fastest">🥉</span>
                                     @else
-                                        {{ $globalIndex + 1 }}
+                                        <span class="inline-flex h-7 w-7 items-center justify-center text-sm font-bold">{{ $globalIndex + 1 }}</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">
