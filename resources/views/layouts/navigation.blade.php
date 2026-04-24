@@ -5,7 +5,7 @@
     $brandName = \Illuminate\Support\Str::beforeLast($brandName, '.');
 
     $navItems = [
-        ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
+        ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => ['dashboard', 'attendance.*']],
         ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation],
         ['label' => __('System Config'), 'route' => 'approval.settings.index', 'active' => 'approval.settings.*', 'visible' => $isAdminNavigation],
         ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*'],
@@ -92,7 +92,7 @@
             @foreach ($navItems as $item)
                 <a
                     href="{{ route($item['route']) }}"
-                    class="block rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['active']) ? 'bg-navy-primary text-white' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary' }}"
+                    class="block rounded-xl px-3 py-2 text-sm font-medium transition {{ request()->routeIs(...(array) $item['active']) ? 'bg-navy-primary text-white' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary' }}"
                 >
                     {{ $item['label'] }}
                 </a>

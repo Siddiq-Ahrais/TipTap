@@ -15,8 +15,8 @@
             $isAdminNavigation = in_array(strtolower((string) auth()->user()?->role), ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
             $sidebarItems = [
-                ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard', 'icon' => 'home'],
-                ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.index', 'visible' => $isAdminNavigation, 'icon' => 'shield'],
+                ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => ['dashboard', 'attendance.*'], 'icon' => 'home'],
+                ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation, 'icon' => 'shield'],
                 ['label' => __('Leaves'), 'route' => 'leaves.index', 'active' => 'leaves.*', 'icon' => 'calendar'],
                 ['label' => __('Posts'), 'route' => 'posts.index', 'active' => 'posts.*', 'icon' => 'document'],
                 ['label' => __('Profile'), 'route' => 'profile.edit', 'active' => 'profile.*', 'icon' => 'user'],
@@ -50,7 +50,7 @@
                             @foreach ($sidebarItems as $item)
                                 <a
                                     href="{{ route($item['route']) }}"
-                                    class="sidebar-link {{ request()->routeIs($item['active']) ? 'sidebar-link-active' : '' }}"
+                                    class="sidebar-link {{ request()->routeIs(...(array) $item['active']) ? 'sidebar-link-active' : '' }}"
                                 >
                                     <span class="flex items-center gap-2.5">
                                         @if (($item['icon'] ?? '') === 'home')
@@ -80,7 +80,7 @@
                                 @foreach ($sidebarBottomItems as $item)
                                     <a
                                         href="{{ route($item['route']) }}"
-                                        class="sidebar-link {{ request()->routeIs($item['active']) ? 'sidebar-link-active' : '' }}"
+                                        class="sidebar-link {{ request()->routeIs(...(array) $item['active']) ? 'sidebar-link-active' : '' }}"
                                     >
                                         <span class="flex items-center gap-2.5">
                                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.19.95c.27.087.53.197.78.328l.81-.54a1 1 0 011.25.12l1.67 1.67a1 1 0 01.12 1.25l-.54.81c.13.25.24.51.33.78l.95.19a1 1 0 01.8.98v2.36a1 1 0 01-.8.98l-.95.19a5.76 5.76 0 01-.33.78l.54.81a1 1 0 01-.12 1.25l-1.67 1.67a1 1 0 01-1.25.12l-.81-.54c-.25.13-.51.24-.78.33l-.19.95a1 1 0 01-.98.8H8.82a1 1 0 01-.98-.8l-.19-.95a5.76 5.76 0 01-.78-.33l-.81.54a1 1 0 01-1.25-.12l-1.67-1.67a1 1 0 01-.12-1.25l.54-.81a5.76 5.76 0 01-.33-.78l-.95-.19a1 1 0 01-.8-.98V8.82a1 1 0 01.8-.98l.95-.19a5.76 5.76 0 01.328-.78l-.54-.81a1 1 0 01.12-1.25l1.67-1.67a1 1 0 011.25-.12l.81.54c.25-.13.51-.24.78-.33l.19-.95ZM10 13a3 3 0 100-6 3 3 0 000 6Z" clip-rule="evenodd" /></svg>
