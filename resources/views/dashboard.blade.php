@@ -95,6 +95,13 @@
         $officeCheckIn = old('office_check_in', data_get($globalSettings ?? [], 'office_check_in', data_get($settings ?? [], 'office_check_in', '08:00')));
         $officeCheckOut = old('office_check_out', data_get($globalSettings ?? [], 'office_check_out', data_get($settings ?? [], 'office_check_out', '17:00')));
 
+        $leaveUser = auth()->user();
+        $remainingLeave = $leaveUser->remainingLeaveDays();
+        $totalQuota = $leaveUser->leave_quota ?? 8;
+        $usedLeave = $leaveUser->usedLeaveDays();
+        $leaveTrend = $remainingLeave >= ($totalQuota / 2) ? 'On track' : ($remainingLeave > 0 ? 'Low balance' : 'No quota left');
+        $leaveTrendDir = $remainingLeave >= ($totalQuota / 2) ? 'neutral' : 'down';
+
         $metricCards = $metrics ?? [
             [
                 'label' => 'This Month Attendance',
@@ -105,10 +112,10 @@
             ],
             [
                 'label' => 'Leave Balance',
-                'value' => data_get($stats ?? [], 'leave_balance', '8 Days'),
-                'caption' => 'Annual leave remaining',
-                'trend' => 'On track',
-                'trendDirection' => 'neutral',
+                'value' => $remainingLeave . ' Days',
+                'caption' => 'of ' . $totalQuota . ' days · ' . $usedLeave . ' used',
+                'trend' => $leaveTrend,
+                'trendDirection' => $leaveTrendDir,
             ],
             [
                 'label' => 'Punctuality Score',

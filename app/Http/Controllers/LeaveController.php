@@ -26,7 +26,7 @@ class LeaveController extends Controller
             $request->all(),
             [
                 'jenis_izin' => ['required', 'string', Rule::in(['Sakit', 'Cuti Tahunan', 'Keperluan Mendadak'])],
-                'tanggal_mulai' => ['required', 'date'],
+                'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
                 'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
                 'alasan' => ['required', 'string'],
                 'bukti_file' => ['required_if:jenis_izin,Sakit', 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
@@ -121,7 +121,7 @@ class LeaveController extends Controller
             $request->all(),
             [
                 'jenis_izin' => ['required', 'string', Rule::in(['Sakit', 'Cuti Tahunan', 'Keperluan Mendadak'])],
-                'tanggal_mulai' => ['required', 'date'],
+                'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
                 'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
                 'alasan' => ['required', 'string'],
                 'bukti_file' => ['required_if:jenis_izin,Sakit', 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB limit
@@ -139,6 +139,19 @@ class LeaveController extends Controller
         }
 
         $validated = $validator->validated();
+
+        // Check leave quota
+        $startDate = \Illuminate\Support\Carbon::parse($validated['tanggal_mulai']);
+        $endDate = \Illuminate\Support\Carbon::parse($validated['tanggal_selesai']);
+        $requestedDays = $startDate->diffInDays($endDate) + 1;
+        $remainingDays = $user->remainingLeaveDays();
+
+        if ($requestedDays > $remainingDays) {
+            return redirect()->back()
+                ->withErrors(['tanggal_selesai' => "Not enough leave quota. You are requesting {$requestedDays} day(s) but only have {$remainingDays} day(s) remaining."])
+                ->withInput();
+        }
+
         $storedPath = null;
 
         if ($request->hasFile('bukti_file')) {

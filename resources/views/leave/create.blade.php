@@ -35,8 +35,26 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('leaves.store') }}" method="POST" enctype="multipart/form-data" id="leaveForm" class="space-y-6">
+                    <form action="{{ route('leaves.store') }}" method="POST" enctype="multipart/form-data" id="leaveForm" class="space-y-6"
+                          data-remaining-leave="{{ auth()->user()->remainingLeaveDays() }}">
                         @csrf
+
+                        {{-- Leave Quota Info --}}
+                        @php
+                            $remaining = auth()->user()->remainingLeaveDays();
+                            $total = auth()->user()->leave_quota ?? 8;
+                            $used = auth()->user()->usedLeaveDays();
+                        @endphp
+                        <div class="rounded-lg border {{ $remaining > 0 ? 'border-[#0B4A85]/20 bg-[#E7EFF6]' : 'border-rose-300 bg-rose-50' }} p-4 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold {{ $remaining > 0 ? 'text-[#0B4A85]' : 'text-rose-700' }}">Leave Quota</p>
+                                <p class="text-xs {{ $remaining > 0 ? 'text-slate-600' : 'text-rose-600' }}">{{ $used }} of {{ $total }} days used this year</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold {{ $remaining > 0 ? 'text-[#0B4A85]' : 'text-rose-700' }}">{{ $remaining }}</p>
+                                <p class="text-xs {{ $remaining > 0 ? 'text-slate-500' : 'text-rose-500' }}">days remaining</p>
+                            </div>
+                        </div>
 
                         <!-- Leave Type -->
                         <div>
@@ -58,7 +76,7 @@
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="h-5 w-5 text-[#0B4A85]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
-                                    <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required class="pl-10 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md">
+                                    <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" min="{{ now()->format('Y-m-d') }}" required class="pl-10 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md">
                                 </div>
                                 <p class="mt-1 text-sm text-rose-600 hidden" id="error-tanggal_mulai">Start date is required.</p>
                             </div>
@@ -69,7 +87,7 @@
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="h-5 w-5 text-[#0B4A85]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
-                                    <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required class="pl-10 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md">
+                                    <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" min="{{ now()->format('Y-m-d') }}" required class="pl-10 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md">
                                 </div>
                                 <p class="mt-1 text-sm text-rose-600 hidden" id="error-tanggal_selesai">End date must be equal or later than start date.</p>
                             </div>
@@ -173,6 +191,16 @@
 
             jenisIzinSelect.addEventListener('change', toggleFileUpload);
 
+            // Sync end date min with start date
+            startDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    endDateInput.min = this.value;
+                    if (endDateInput.value && endDateInput.value < this.value) {
+                        endDateInput.value = this.value;
+                    }
+                }
+            });
+
             function toggleFileUpload() {
                 // In Indonesian options, "Sakit" requires file. Or allow optional for others.
                 if (jenisIzinSelect.value === 'Sakit') {
@@ -215,6 +243,17 @@
                         document.getElementById('error-tanggal_selesai').innerText = "End date cannot be earlier than start date.";
                         document.getElementById('error-tanggal_selesai').classList.remove('hidden');
                         isValid = false;
+                    } else {
+                        // Check leave quota
+                        const remainingLeave = parseInt(form.dataset.remainingLeave, 10);
+                        const diffTime = end.getTime() - start.getTime();
+                        const requestedDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        if (requestedDays > remainingLeave) {
+                            document.getElementById('error-tanggal_selesai').innerText = 
+                                "Not enough leave quota. You are requesting " + requestedDays + " day(s) but only have " + remainingLeave + " day(s) remaining.";
+                            document.getElementById('error-tanggal_selesai').classList.remove('hidden');
+                            isValid = false;
+                        }
                     }
                 }
 
