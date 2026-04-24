@@ -7,6 +7,8 @@ use App\Http\Middleware\ApprovedUserMiddleware;
 use App\Http\Middleware\EnsureContractIsActiveForAttendance;
 use App\Http\Middleware\RoleMiddleware;
 
+use App\Http\Middleware\RedirectAlphaUser;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -20,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'approved' => ApprovedUserMiddleware::class,
             'contract.active' => EnsureContractIsActiveForAttendance::class,
         ]);
+
+        $middleware->appendToGroup('web', RedirectAlphaUser::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

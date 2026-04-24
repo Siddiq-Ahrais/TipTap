@@ -30,6 +30,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create Alpha developer account (System Config + Reset Attendance only)
+        User::firstOrCreate(
+            ['email' => 'alpha@tiptap.id'],
+            [
+                'name' => 'Alpha',
+                'password' => Hash::make('password123'),
+                'role' => 'alpha',
+                'divisi' => 'Development',
+                'status_pekerjaan' => 'aktif',
+                'is_approved' => true,
+            ]
+        );
+
         // Create default settings
         Setting::firstOrCreate(
             ['id' => 1],

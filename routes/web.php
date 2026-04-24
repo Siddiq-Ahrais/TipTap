@@ -51,4 +51,12 @@ Route::middleware(['auth', 'approved'])->group(function (): void {
 	Route::resource('posts', PostController::class);
 });
 
+use App\Http\Controllers\AlphaController;
+
+Route::middleware(['auth', 'approved'])->prefix('alpha')->name('alpha.')->group(function (): void {
+	Route::get('/settings', [AlphaController::class, 'settings'])->name('settings.index');
+	Route::patch('/settings', [AlphaController::class, 'updateSettings'])->name('settings.update');
+	Route::delete('/attendance/reset', [AlphaController::class, 'resetAttendance'])->name('attendance.reset');
+});
+
 require __DIR__.'/auth.php';

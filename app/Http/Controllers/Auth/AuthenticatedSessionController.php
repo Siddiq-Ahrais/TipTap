@@ -38,6 +38,10 @@ class AuthenticatedSessionController extends Controller
                 'email' => 'Account pending Admin approval.',
             ]);
         }
+        if (strtolower((string) $request->user()?->role) === 'alpha') {
+            return redirect()->route('alpha.settings.index');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
