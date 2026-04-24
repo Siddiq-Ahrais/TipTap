@@ -1,6 +1,9 @@
 @php
     $isAdminNavigation = in_array(strtolower((string) auth()->user()?->role), ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
+    $brandName = (string) (\App\Models\Setting::first()?->company_email_domain ?: config('app.name', 'TipTap'));
+    $brandName = \Illuminate\Support\Str::beforeLast($brandName, '.');
+
     $navItems = [
         ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
         ['label' => __('Approval'), 'route' => 'approval.index', 'active' => 'approval.*', 'visible' => $isAdminNavigation],
@@ -27,7 +30,7 @@
             </a>
 
             <div>
-                <p class="font-display text-sm font-extrabold tracking-tight text-white">{{ config('app.name', 'TipTap') }}</p>
+                <p class="font-display text-sm font-extrabold tracking-tight text-white">{{ $brandName }}</p>
                 <p class="text-xs text-slate-100/85">Employee Workspace</p>
             </div>
         </div>
