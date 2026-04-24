@@ -41,11 +41,12 @@
 
 | Category | Features |
 |---|---|
-| **Attendance** | Clock-in/clock-out with late detection, early checkout requests, attendance history with pagination |
+| **Attendance** | Clock-in/clock-out with late detection, early checkout requests, attendance history with pagination, work day awareness (auto day-off detection) |
 | **Leave Management** | Leave request form (Sick, Annual, Emergency), file upload for medical certificates, leave quota system (auto-deduct), date validation (no past dates) |
 | **Admin Approval** | Approve/reject new user registrations, leave requests, and early checkouts from a unified dashboard |
-| **Dashboard** | Real-time attendance stats, leave balance tracker, punctuality score, today's attendance ranking with medal icons (🥇🥈🥉) |
+| **Dashboard** | Real-time attendance stats (dynamic monthly count), leave balance tracker (auto-calculated), punctuality score (on-time ratio), today's attendance ranking with medal icons (🥇🥈🥉) |
 | **Export** | Download attendance data as Excel (.xls) files — supports Today, Weekly, and Monthly reports |
+| **System Config** | Configurable work days (Mon–Sun checkboxes), office hours, company email domain |
 | **Security** | Role-based access control, contract expiration checks, approved-only access, no "Remember Me" on login |
 | **Responsive UI** | Fully responsive design with a navy-themed sidebar, glassmorphism cards, and smooth transitions |
 
@@ -71,10 +72,10 @@ TipTap/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
-│   │   │   ├── AttendanceController.php      # Clock-in/out & history
+│   │   │   ├── AttendanceController.php      # Clock-in/out, history, work-day check
 │   │   │   ├── AttendanceExportController.php # Excel export (today/weekly/monthly)
-│   │   │   ├── ApprovalController.php        # Admin approval center
-│   │   │   ├── LeaveController.php           # Leave requests (web + API)
+│   │   │   ├── ApprovalController.php        # Admin approval center + settings
+│   │   │   ├── LeaveController.php           # Leave requests (web + API) with quota
 │   │   │   ├── PostController.php            # Announcements CRUD
 │   │   │   ├── ProfileController.php         # User profile editing
 │   │   │   ├── AlphaController.php           # Dev tools & system config
@@ -89,10 +90,10 @@ TipTap/
 │       ├── Attendance.php    # Daily attendance records
 │       ├── Leave.php         # Leave/sick requests
 │       ├── Post.php          # Announcements
-│       └── Setting.php       # System-wide settings
+│       └── Setting.php       # System-wide settings (hours, work days)
 ├── resources/views/
 │   ├── dashboard.blade.php   # Main employee dashboard
-│   ├── approval/             # Admin approval pages
+│   ├── approval/             # Admin approval pages + settings
 │   ├── attendance/           # Attendance history
 │   ├── leave/                # Leave request forms
 │   ├── post/                 # Post/announcement pages
@@ -110,7 +111,7 @@ TipTap/
 | Role | Access Level |
 |---|---|
 | **Super Admin** | Full access — manage settings, approve users, view all data, dev tools |
-| **Admin** | Approval center — manage registrations, leaves, early checkouts, export reports |
+| **Admin** | Approval center — manage registrations, leaves, early checkouts, export reports, configure work days & hours |
 | **User (Employee)** | Personal dashboard — clock-in/out, submit leave requests, view own history |
 
 ### Access Flow
@@ -135,17 +136,24 @@ New Registration → Pending → Admin Approves → Employee can Login & Clock-i
 The dashboard (`/dashboard`) displays:
 
 - **Employee Profile Card** — Name, role, division, employee ID, email
-- **Today's Attendance Status** — Real-time clock-in/out status with pending indicators
-- **Metric Cards:**
-  - 📊 **This Month Attendance** — Days attended vs target
-  - 📅 **Leave Balance** — Remaining quota with used count (auto-calculated)
-  - ⏰ **Punctuality Score** — On-time arrival percentage
+- **Today's Attendance Status** — Real-time status with smart detection:
+  - ✅ **Checked In** — Currently clocked in
+  - ⚠️ **Late** — Clocked in after office hours
+  - ✔️ **Checked Out** — Shift complete
+  - ⏳ **Pending** — Awaiting approval
+  - 🏖️ **Day Off** — Today is not a scheduled work day (auto-detected from settings)
+  - 🔴 **Not Yet Clocked In** — Waiting to start
+- **Metric Cards (all dynamic, real-time):**
+  - 📊 **This Month Attendance** — Counts distinct clock-in days this month, starting from 0. Shows percentage achieved vs target working days.
+  - 📅 **Leave Balance** — Auto-calculated remaining quota. Shows `X of Y days · Z used`. Deducts from the user's 8-day annual quota for each leave request (Pending + Approved).
+  - ⏰ **Punctuality Score** — `(on-time days ÷ total clock-in days) × 100%`. Example: 1 on-time + 1 late = 50%. Shows breakdown like "9 on-time, 1 late".
 - **Recent Attendance Activity** — Last 3 records with status badges
-- **Clock-in / Clock-out Buttons** — With early checkout request option
+- **Clock-in / Clock-out Buttons** — Disabled on non-work days
 
 ### 3. Attendance Management
 
 - **Clock-in** (`POST /clock-in`) — Records entry time, detects late arrivals based on office hours
+  - **Work Day Check** — If today is not a configured work day (e.g., Saturday/Sunday), clock-in is blocked both in the UI and server-side
 - **Clock-out** (`PUT /clock-out`) — Records exit time, calculates early departure
 - **Early Checkout** — If clocking out before office hours, a request is sent for admin approval
 - **Attendance History** (`/attendance/history`) — Paginated history (10/20/30/50/100 per page) with status badges (On Time, Late, Early Checkout, etc.)
@@ -157,12 +165,13 @@ The dashboard (`/dashboard`) displays:
   - Leave types: **Sakit** (Sick), **Cuti Tahunan** (Annual), **Keperluan Mendadak** (Emergency)
   - Date range picker (past dates disabled — only today and future)
   - File upload for medical certificates (JPG, PNG, PDF — up to 5MB) with drag-and-drop
-  - Auto-calculated leave quota display
+  - Auto-calculated leave quota display at top of form
 - **Leave Quota System:**
-  - Default: **8 days/year** per employee (`leave_quota` column)
+  - Default: **8 days/year** per employee (`leave_quota` column in users table)
   - Days are counted inclusively (Apr 24–26 = 3 days)
   - Both **Pending** and **Approved** leaves count toward usage
   - Client-side + server-side validation prevents exceeding quota
+  - Dashboard card updates in real-time with remaining balance and trend
 - **Leave History** (`/leaves`) — View all submitted requests with status filters
 
 ### 5. Approval Center (Admin)
@@ -175,9 +184,9 @@ The admin approval hub (`/approval`) includes:
   - Real-time badge showing clocked-in count vs total employees
 - **Sub-menus:**
   - **Pending Registrations** (`/approval/registrations`) — Approve or reject new employee signups
-  - **Leave Requests** (`/approval/leaves`) — Review leave requests with medical certificate preview in a responsive modal
+  - **Leave Requests** (`/approval/leaves`) — Review leave requests with medical certificate preview in a fully responsive, scrollable modal
   - **Early Checkouts** (`/approval/early-checkouts`) — Approve or reject early departure requests
-  - **Approval Settings** (`/approval/settings`) — Configure office hours and rules
+  - **Settings** (`/approval/settings`) — Configure office hours, work days, and company email domain
 
 ### 6. Attendance Export
 
@@ -210,9 +219,19 @@ Full CRUD system for internal announcements:
 
 ### 9. System Configuration
 
-- **Office Hours** — Set company check-in and check-out times
-- **Company Email Domain** — Configure allowed email domain for registration
-- **Approval Settings** — Configure how approvals are processed
+Admins can configure via **Settings** (`/approval/settings`):
+
+| Setting | Description |
+|---|---|
+| **Company Email Domain** | Allowed email domain for registration (e.g. `sukamaju.id`) |
+| **Standard Clock-In Time** | Office start time (e.g. `08:00`) |
+| **Standard Clock-Out Time** | Office end time (e.g. `17:00`) |
+| **Work Days** | Checkboxes for Monday–Sunday. Unchecked days = Day Off (employees cannot clock in) |
+
+The work days setting affects:
+- Dashboard shows "Day Off" status on non-work days
+- Clock-in button is hidden on non-work days
+- Server rejects clock-in attempts on non-work days
 
 ### 10. Alpha / Dev Tools
 
@@ -230,9 +249,9 @@ RESTful API for mobile app integration:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/attendance/clock-in` | Clock in (requires auth + approved + active contract) |
+| `POST` | `/api/attendance/clock-in` | Clock in (requires auth + approved + active contract + work day) |
 | `PUT` | `/api/attendance/clock-out` | Clock out |
-| `POST` | `/api/leaves/apply` | Submit a leave request with file upload |
+| `POST` | `/api/leaves/apply` | Submit a leave request with file upload + quota check |
 | `GET` | `/api/leaves/history` | Get paginated leave history |
 
 All API routes require authentication via Laravel Sanctum/session.
@@ -263,9 +282,13 @@ All API routes require authentication via Laravel Sanctum/session.
 | `tanggal` | date | Attendance date |
 | `waktu_masuk` | time? | Clock-in time |
 | `waktu_keluar` | time? | Clock-out time |
-| `status` | string | `hadir`, `terlambat`, `pulang cepat` |
+| `status` | string | `Hadir`, `Terlambat`, `Pulang Cepat` |
 | `early_checkout_status` | string? | `pending`, `approved`, `rejected` |
 | `early_checkout_reason` | text? | Reason for early checkout |
+| `early_checkout_requested_at` | datetime? | When early checkout was requested |
+| `early_checkout_reviewed_at` | datetime? | When admin reviewed |
+| `early_checkout_reviewed_by` | foreignId? | Admin who reviewed |
+| `early_checkout_note` | text? | Admin review note |
 
 ### Leaves
 | Column | Type | Description |
@@ -282,8 +305,11 @@ All API routes require authentication via Laravel Sanctum/session.
 ### Settings
 | Column | Type | Description |
 |---|---|---|
-| `key` | string | Setting key (e.g. `office_check_in`) |
-| `value` | text | Setting value |
+| `id` | bigint | Primary key |
+| `jam_masuk_kantor` | time | Office clock-in time (default: `08:00`) |
+| `jam_mulai_pulang` | time | Office clock-out time (default: `17:00`) |
+| `company_email_domain` | string? | Allowed email domain |
+| `work_days` | json | Array of active work day numbers: `[1,2,3,4,5]` (1=Mon, 7=Sun) |
 
 ---
 
@@ -295,6 +321,7 @@ All API routes require authentication via Laravel Sanctum/session.
 - Composer
 - Node.js ≥ 18
 - npm
+- MySQL / MariaDB
 
 ### Setup
 
@@ -343,15 +370,27 @@ This runs the full setup script: install dependencies → generate key → migra
 
 1. Register a new account at `/register`
 2. Log in as Super Admin via `/admin/login` to approve the account
-3. Once approved, the employee can log in and access the dashboard
+3. Configure work days and office hours at `/approval/settings`
+4. Once approved, the employee can log in and access the dashboard
 
 ### Daily Workflow
 
-1. **Employee** logs in → clicks **Clock In** on dashboard
+1. **Employee** logs in → dashboard shows today's status
+   - If **work day** → clicks **Clock In**
+   - If **day off** → sees "Day Off" badge, no clock-in required
 2. At end of day → clicks **Clock Out** (or requests Early Checkout)
 3. If sick → goes to **Leaves** → submits absence request with medical certificate
+   - System checks remaining leave quota before allowing submission
 4. **Admin** reviews and approves/rejects requests from the **Approval Center**
 5. Admin can download attendance reports from the **Export** section
+
+### Dashboard Metrics Explained
+
+| Metric | How It Works |
+|---|---|
+| **This Month Attendance** | Counts each unique day you clocked in this month. Starts from 0, +1 per clock-in day. |
+| **Leave Balance** | `quota (8) − used days`. Both Pending and Approved leaves count. Shows "No quota left" when 0. |
+| **Punctuality Score** | `(on-time days ÷ total days) × 100%`. 1 on-time + 1 late = 50%. Resets each month. |
 
 ---
 
