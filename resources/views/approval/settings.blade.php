@@ -1,18 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-navy-primary/70">System Config</p>
-                <h2 class="mt-1 font-display text-2xl font-semibold text-navy-primary sm:text-3xl">
-                    Global Working Hours Settings
-                </h2>
-            </div>
-            <a href="{{ route('approval.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-[#0B4A85]/30 bg-white px-4 py-2 text-sm font-semibold text-[#0B4A85] transition hover:bg-[#0B4A85]/5">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M17 10a1 1 0 01-1 1H6.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L6.414 9H16a1 1 0 011 1z" clip-rule="evenodd" />
-                </svg>
-                Back to Approval Menu
-            </a>
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-navy-primary/70">System Config</p>
+            <h2 class="mt-1 font-display text-2xl font-semibold text-navy-primary sm:text-3xl">
+                Global Working Hours Settings
+            </h2>
         </div>
     </x-slot>
 
