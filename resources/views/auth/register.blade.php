@@ -6,10 +6,10 @@
                 showPassword: false,
                 showConfirmation: false,
                 name: @js(old('name', '')),
-                email: @js(old('email', '')),
+                username: @js(old('username', old('email') ? explode('@', old('email'))[0] : '')),
                 password: '',
                 confirmation: '',
-                touchedEmail: false,
+                touchedUsername: false,
                 touchedPassword: false,
                 touchedConfirmation: false,
                 hasPasswordError: @js($errors->has('password')),
@@ -48,36 +48,45 @@
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-[#0B4A85]/80 pointer-events-none">
-                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path d="M2.94 5.5A2 2 0 014.75 4.5h10.5a2 2 0 011.81 1L10 9.97 2.94 5.5z" />
-                                    <path d="M2.5 7.2V14a2 2 0 002 2h11a2 2 0 002-2V7.2l-7.06 4.04a1 1 0 01-.98 0L2.5 7.2z" />
-                                </svg>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                        <div class="flex">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-3 flex items-center text-[#0B4A85]/80 pointer-events-none">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path d="M2.94 5.5A2 2 0 014.75 4.5h10.5a2 2 0 011.81 1L10 9.97 2.94 5.5z" />
+                                        <path d="M2.5 7.2V14a2 2 0 002 2h11a2 2 0 002-2V7.2l-7.06 4.04a1 1 0 01-.98 0L2.5 7.2z" />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="username"
+                                    type="text"
+                                    name="username"
+                                    x-model="username"
+                                    @input="username = username.replace(/@/g, '')"
+                                    @blur="touchedUsername = true"
+                                    required
+                                    autocomplete="username"
+                                    placeholder="username"
+                                    class="w-full pl-10 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-l-lg rounded-r-none text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all"
+                                />
+                            </div>
+                            <span class="inline-flex items-center bg-gray-100 border border-l-0 border-gray-300 text-gray-500 text-sm font-medium rounded-r-lg px-3 select-none">
+                                &#64;{{ $companyDomain }}
                             </span>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                :value="email"
-                                x-model="email"
-                                @blur="touchedEmail = true"
-                                required
-                                autocomplete="username"
-                                placeholder="you@company.com"
-                                class="w-full pl-10 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all"
-                            />
                         </div>
+
+                        <!-- Hidden field sends the full concatenated email -->
+                        <input type="hidden" name="email" :value="username + '@' + '{{ $companyDomain }}'">
 
                         <p
                             x-cloak
-                            x-show="touchedEmail && email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)"
+                            x-show="touchedUsername && username.length > 0 && !/^[a-zA-Z0-9._-]+$/.test(username)"
                             class="mt-1.5 text-xs text-rose-600"
                         >
-                            Enter a valid email address.
+                            Username may only contain letters, numbers, dots, hyphens, and underscores.
                         </p>
 
+                        <x-input-error :messages="$errors->get('username')" class="mt-1.5 text-xs !text-rose-600" />
                         <x-input-error :messages="$errors->get('email')" class="mt-1.5 text-xs !text-rose-600" />
                     </div>
 

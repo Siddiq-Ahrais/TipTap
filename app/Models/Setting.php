@@ -12,10 +12,12 @@ class Setting extends Model
     protected $fillable = [
         'jam_masuk_kantor',
         'jam_mulai_pulang',
+        'company_email_domain',
     ];
 
     protected $casts = [
         'jam_masuk_kantor' => 'string',
         'jam_mulai_pulang' => 'string',
+        'company_email_domain' => 'string',
     ];
 }

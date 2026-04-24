@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\User;
 use App\Rules\CompanyEmailDomain;
 use Illuminate\Auth\Events\Registered;
@@ -20,7 +21,12 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $companyDomain = (string) (Setting::first()?->company_email_domain
+            ?: config('app.company_email_domain', 'company.com'));
+
+        return view('auth.register', [
+            'companyDomain' => $companyDomain,
+        ]);
     }
 
     /**
@@ -30,10 +36,22 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $companyDomain = (string) (Setting::first()?->company_email_domain
+            ?: config('app.company_email_domain', 'company.com'));
+
+        // Concatenate username + domain into a full email before validation
+        $username = strtolower(trim(str_replace('@', '', (string) $request->input('username', ''))));
+        $request->merge([
+            'email' => $username . '@' . $companyDomain,
+        ]);
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9._-]+$/'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new CompanyEmailDomain()],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'username.regex' => 'Username may only contain letters, numbers, dots, hyphens, and underscores.',
         ]);
 
         $user = User::create([

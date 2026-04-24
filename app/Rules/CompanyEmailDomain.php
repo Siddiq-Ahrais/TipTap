@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Setting;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -27,7 +28,8 @@ class CompanyEmailDomain implements ValidationRule
         $expectedDomain = strtolower(
             $this->allowedDomain !== ''
                 ? $this->allowedDomain
-                : (string) config('app.company_email_domain', 'company.com')
+                : (string) (Setting::first()?->company_email_domain
+                    ?: config('app.company_email_domain', 'company.com'))
         );
 
         if ($domain !== $expectedDomain) {
