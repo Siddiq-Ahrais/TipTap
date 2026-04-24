@@ -175,9 +175,15 @@ class ApprovalController extends Controller
             'company_email_domain' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$/'],
             'jam_masuk_kantor' => ['required', 'date_format:H:i'],
             'jam_mulai_pulang' => ['required', 'date_format:H:i'],
+            'work_days' => ['nullable', 'array'],
+            'work_days.*' => ['integer', 'between:1,7'],
         ], [
             'company_email_domain.regex' => 'Use a valid company email domain like tiptap.id.',
         ]);
+
+        // Ensure work_days is always an array of integers
+        $validated['work_days'] = array_map('intval', $validated['work_days'] ?? [1, 2, 3, 4, 5]);
+        sort($validated['work_days']);
 
         $settings = Setting::query()->firstOrCreate(['id' => 1]);
         $settings->update($validated);

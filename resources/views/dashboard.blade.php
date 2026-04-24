@@ -50,7 +50,18 @@
         $authRole = strtolower((string) auth()->user()?->role);
         $isAdminActor = in_array($authRole, ['admin', 'administrator', 'superadmin', 'super admin', 'super_admin'], true);
 
+        // Check if today is a work day
+        $globalSettingsRecord = \App\Models\Setting::query()->first();
+        $workDays = $globalSettingsRecord?->active_work_days ?? [1, 2, 3, 4, 5];
+        $todayDayOfWeek = (int) now()->format('N'); // 1=Mon, 7=Sun
+        $isTodayWorkDay = in_array($todayDayOfWeek, $workDays, true);
+
         $statusMeta = [
+            'day_off' => [
+                'label' => 'Day Off',
+                'tone' => 'sky',
+                'description' => 'Today is not a scheduled work day. Enjoy your day off!',
+            ],
             'checked_in' => [
                 'label' => 'Checked In',
                 'tone' => 'emerald',
@@ -83,9 +94,14 @@
             ],
         ];
 
+        // Override status if today is a day off (and employee hasn't clocked in)
+        if (! $isTodayWorkDay && in_array($statusKey, ['not_yet_clocked_in', 'absent'], true)) {
+            $statusKey = 'day_off';
+        }
+
         $todayMeta = $statusMeta[$statusKey];
 
-        $canClockIn = in_array($statusKey, ['not_yet_clocked_in', 'absent'], true);
+        $canClockIn = $isTodayWorkDay && in_array($statusKey, ['not_yet_clocked_in', 'absent'], true);
         $canAttemptClockOut = in_array($statusKey, ['checked_in', 'late'], true);
 
         $requiresClockOutApproval = ! $isAdminActor;

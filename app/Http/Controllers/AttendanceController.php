@@ -49,6 +49,14 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $today = $now->toDateString();
 
+        // Check if today is a work day
+        $settings = Setting::query()->first();
+        $workDays = $settings?->work_days ?? [1, 2, 3, 4, 5];
+        $todayDayOfWeek = (int) $now->format('N');
+        if (! in_array($todayDayOfWeek, $workDays, true)) {
+            return $this->errorResponse($request, 'Today is not a scheduled work day. Clock-in is not required.', 422);
+        }
+
         $alreadyClockedIn = Attendance::query()
             ->where('user_id', $user->id)
             ->whereDate('tanggal', $today)
