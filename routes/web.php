@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware(['auth', 'approved'])->group(function (): void {
 	Route::post('/clock-in', [AttendanceController::class, 'clockIn'])->middleware('contract.active');
 	Route::put('/clock-out', [AttendanceController::class, 'clockOut'])->middleware('contract.active');
+	Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
 
 	Route::prefix('approval')->name('approval.')->group(function (): void {
 		Route::get('/', [ApprovalController::class, 'index'])->name('index');
@@ -57,6 +58,10 @@ Route::middleware(['auth', 'approved'])->prefix('alpha')->name('alpha.')->group(
 	Route::get('/settings', [AlphaController::class, 'settings'])->name('settings.index');
 	Route::patch('/settings', [AlphaController::class, 'updateSettings'])->name('settings.update');
 	Route::delete('/attendance/reset', [AlphaController::class, 'resetAttendance'])->name('attendance.reset');
+
+	Route::get('/devtools', [AlphaController::class, 'devTools'])->name('devtools.index');
+	Route::post('/devtools/add-days', [AlphaController::class, 'addDays'])->name('devtools.addDays');
+	Route::delete('/devtools/reset-testers', [AlphaController::class, 'resetTesters'])->name('devtools.resetTesters');
 });
 
 require __DIR__.'/auth.php';

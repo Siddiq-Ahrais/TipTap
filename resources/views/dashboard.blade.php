@@ -678,8 +678,8 @@
                         <p class="text-sm text-slate-500">Latest records from your attendance timeline.</p>
                     </div>
 
-                    <a href="{{ route('leaves.index') }}" class="inline-flex items-center rounded-xl border border-navy-primary/30 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-navy-primary transition hover:bg-navy-primary/5">
-                        View Leave History
+                    <a href="{{ route('attendance.history') }}" class="inline-flex items-center rounded-xl border border-navy-primary/30 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-navy-primary transition hover:bg-navy-primary/5">
+                        View Full History
                     </a>
                 </div>
 

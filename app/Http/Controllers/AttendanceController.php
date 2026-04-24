@@ -8,9 +8,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\View\View;
 
 class AttendanceController extends Controller
 {
+    /**
+     * Show the user's full attendance history with pagination.
+     */
+    public function history(Request $request): View
+    {
+        $user = $request->user();
+        $perPage = (int) $request->input('per_page', 10);
+
+        // Clamp to allowed values
+        if (! in_array($perPage, [10, 20, 30, 50, 100], true)) {
+            $perPage = 10;
+        }
+
+        $attendances = Attendance::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('waktu_masuk')
+            ->paginate($perPage)
+            ->appends(['per_page' => $perPage]);
+
+        return view('attendance.history', [
+            'attendances' => $attendances,
+            'perPage' => $perPage,
+        ]);
+    }
+
     public function clockIn(Request $request): JsonResponse|RedirectResponse
     {
         $user = $request->user();

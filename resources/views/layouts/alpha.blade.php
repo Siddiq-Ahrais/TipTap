@@ -80,11 +80,24 @@
                         <nav class="mt-3 space-y-1.5">
                             <a
                                 href="{{ route('alpha.settings.index') }}"
-                                class="sidebar-link sidebar-link-active"
+                                class="sidebar-link {{ request()->routeIs('alpha.settings.*') ? 'sidebar-link-active' : '' }}"
                             >
                                 <span class="flex items-center gap-2.5">
                                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.19.95c.27.087.53.197.78.328l.81-.54a1 1 0 011.25.12l1.67 1.67a1 1 0 01.12 1.25l-.54.81c.13.25.24.51.33.78l.95.19a1 1 0 01.8.98v2.36a1 1 0 01-.8.98l-.95.19a5.76 5.76 0 01-.33.78l.54.81a1 1 0 01-.12 1.25l-1.67 1.67a1 1 0 01-1.25.12l-.81-.54c-.25.13-.51.24-.78.33l-.19.95a1 1 0 01-.98.8H8.82a1 1 0 01-.98-.8l-.19-.95a5.76 5.76 0 01-.78-.33l-.81.54a1 1 0 01-1.25-.12l-1.67-1.67a1 1 0 01-.12-1.25l.54-.81a5.76 5.76 0 01-.33-.78l-.95-.19a1 1 0 01-.8-.98V8.82a1 1 0 01.8-.98l.95-.19a5.76 5.76 0 01.328-.78l-.54-.81a1 1 0 01.12-1.25l1.67-1.67a1 1 0 011.25-.12l.81.54c.25-.13.51-.24.78-.33l.19-.95ZM10 13a3 3 0 100-6 3 3 0 000 6Z" clip-rule="evenodd" /></svg>
                                     <span>System Config</span>
+                                </span>
+                                <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+
+                            <a
+                                href="{{ route('alpha.devtools.index') }}"
+                                class="sidebar-link {{ request()->routeIs('alpha.devtools.*') ? 'sidebar-link-active' : '' }}"
+                            >
+                                <span class="flex items-center gap-2.5">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                    <span>Dev Tools</span>
                                 </span>
                                 <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
