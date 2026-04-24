@@ -102,13 +102,23 @@
         $leaveTrend = $remainingLeave >= ($totalQuota / 2) ? 'On track' : ($remainingLeave > 0 ? 'Low balance' : 'No quota left');
         $leaveTrendDir = $remainingLeave >= ($totalQuota / 2) ? 'neutral' : 'down';
 
+        $monthlyAttendance = \App\Models\Attendance::query()
+            ->where('user_id', auth()->id())
+            ->whereYear('tanggal', now()->year)
+            ->whereMonth('tanggal', now()->month)
+            ->whereNotNull('waktu_masuk')
+            ->distinct('tanggal')
+            ->count('tanggal');
+
+        $workingDaysTarget = (int) now()->daysInMonth - (int) (now()->daysInMonth / 7) * 2; // rough estimate excluding weekends
+
         $metricCards = $metrics ?? [
             [
                 'label' => 'This Month Attendance',
-                'value' => data_get($stats ?? [], 'monthly_attendance', '22 Days'),
-                'caption' => 'Target 24 working days',
-                'trend' => '+4% vs last month',
-                'trendDirection' => 'up',
+                'value' => $monthlyAttendance . ' Days',
+                'caption' => 'Target ' . $workingDaysTarget . ' working days',
+                'trend' => $monthlyAttendance > 0 ? round(($monthlyAttendance / max($workingDaysTarget, 1)) * 100) . '% achieved' : 'No clock-in yet',
+                'trendDirection' => $monthlyAttendance > 0 ? 'up' : 'neutral',
             ],
             [
                 'label' => 'Leave Balance',
@@ -119,10 +129,47 @@
             ],
             [
                 'label' => 'Punctuality Score',
-                'value' => data_get($stats ?? [], 'punctuality', '96%'),
+                'value' => (function () {
+                    $totalDays = \App\Models\Attendance::where('user_id', auth()->id())
+                        ->whereYear('tanggal', now()->year)
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereNotNull('waktu_masuk')
+                        ->count();
+                    if ($totalDays === 0) return '0%';
+                    $lateDays = \App\Models\Attendance::where('user_id', auth()->id())
+                        ->whereYear('tanggal', now()->year)
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereNotNull('waktu_masuk')
+                        ->where('status', 'terlambat')
+                        ->count();
+                    return round((($totalDays - $lateDays) / $totalDays) * 100) . '%';
+                })(),
                 'caption' => 'On-time arrival performance',
-                'trend' => '+1.5%',
-                'trendDirection' => 'up',
+                'trend' => (function () {
+                    $totalDays = \App\Models\Attendance::where('user_id', auth()->id())
+                        ->whereYear('tanggal', now()->year)
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereNotNull('waktu_masuk')
+                        ->count();
+                    if ($totalDays === 0) return 'No data yet';
+                    $lateDays = \App\Models\Attendance::where('user_id', auth()->id())
+                        ->whereYear('tanggal', now()->year)
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereNotNull('waktu_masuk')
+                        ->where('status', 'terlambat')
+                        ->count();
+                    $onTime = $totalDays - $lateDays;
+                    return $onTime . ' on-time, ' . $lateDays . ' late';
+                })(),
+                'trendDirection' => (function () {
+                    $lateDays = \App\Models\Attendance::where('user_id', auth()->id())
+                        ->whereYear('tanggal', now()->year)
+                        ->whereMonth('tanggal', now()->month)
+                        ->whereNotNull('waktu_masuk')
+                        ->where('status', 'terlambat')
+                        ->count();
+                    return $lateDays === 0 ? 'up' : 'down';
+                })(),
             ],
         ];
 
