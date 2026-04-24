@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -85,6 +86,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Clear any remembered email cookie
+        return redirect('/')
+            ->withCookie(Cookie::forget('remembered_email'));
     }
 }
