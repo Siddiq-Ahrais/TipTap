@@ -35,7 +35,7 @@
                         <p class="text-sm text-white/85">{{ $clockedInTodayCount }}/{{ $totalEmployeeCount }} employees clocked in &middot; ranked by earliest clock-in time</p>
                     </div>
                     <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
-                        {{ $todayAttendances->count() }} {{ Str::plural('record', $todayAttendances->count()) }}
+                        {{ $todayAttendances->total() }} {{ Str::plural('record', $todayAttendances->total()) }}
                     </span>
                 </div>
             </header>
@@ -55,6 +55,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($todayAttendances as $index => $attendance)
                             @php
+                                $globalIndex = ($todayAttendances->currentPage() - 1) * $todayAttendances->perPage() + $index;
                                 $empUser = $attendance->user;
                                 $empId = 'EMP-' . str_pad((string) ($empUser?->id ?? 0), 4, '0', STR_PAD_LEFT);
                                 $empName = $empUser?->name ?? '-';
@@ -84,16 +85,16 @@
                                 }
                             @endphp
 
-                            <tr class="hover:bg-slate-50/80 transition-colors {{ $index === 0 ? 'bg-emerald-50/40' : '' }}">
+                            <tr class="hover:bg-slate-50/80 transition-colors {{ $globalIndex === 0 ? 'bg-emerald-50/40' : '' }}">
                                 <td class="px-4 py-3 font-semibold text-slate-500">
-                                    @if ($index === 0)
+                                    @if ($globalIndex === 0)
                                         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-white" title="Fastest clock-in">🥇</span>
-                                    @elseif ($index === 1)
+                                    @elseif ($globalIndex === 1)
                                         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-300 text-xs font-bold text-white" title="2nd fastest">🥈</span>
-                                    @elseif ($index === 2)
+                                    @elseif ($globalIndex === 2)
                                         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white" title="3rd fastest">🥉</span>
                                     @else
-                                        {{ $index + 1 }}
+                                        {{ $globalIndex + 1 }}
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">
@@ -122,6 +123,47 @@
                     </tbody>
                 </table>
             </div>
+
+            @if ($todayAttendances->hasPages())
+                <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50/60">
+                    <p class="text-xs text-slate-500">
+                        Showing <span class="font-semibold text-slate-700">{{ $todayAttendances->firstItem() }}–{{ $todayAttendances->lastItem() }}</span> of <span class="font-semibold text-slate-700">{{ $todayAttendances->total() }}</span>
+                    </p>
+                    <div class="flex items-center gap-1">
+                        @if ($todayAttendances->onFirstPage())
+                            <span class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-300 cursor-not-allowed">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                Prev
+                            </span>
+                        @else
+                            <a href="{{ $todayAttendances->previousPageUrl() }}" class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-[#0B4A85] hover:text-white hover:border-[#0B4A85] transition-all duration-200">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                Prev
+                            </a>
+                        @endif
+
+                        @foreach ($todayAttendances->getUrlRange(1, $todayAttendances->lastPage()) as $page => $url)
+                            @if ($page == $todayAttendances->currentPage())
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B4A85] text-xs font-bold text-white shadow-sm">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-[#0B4A85] hover:text-white hover:border-[#0B4A85] transition-all duration-200">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        @if ($todayAttendances->hasMorePages())
+                            <a href="{{ $todayAttendances->nextPageUrl() }}" class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-[#0B4A85] hover:text-white hover:border-[#0B4A85] transition-all duration-200">
+                                Next
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            </a>
+                        @else
+                            <span class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-300 cursor-not-allowed">
+                                Next
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </section>
 
         <section class="grid gap-5 lg:grid-cols-3">

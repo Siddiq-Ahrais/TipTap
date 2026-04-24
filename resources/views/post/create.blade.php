@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="space-y-6">
     <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Tambah Post</h1>

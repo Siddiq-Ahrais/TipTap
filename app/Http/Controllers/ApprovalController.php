@@ -44,7 +44,7 @@ class ApprovalController extends Controller
             ->with('user:id,name,email,role,divisi')
             ->whereDate('tanggal', now()->toDateString())
             ->orderBy('waktu_masuk', 'asc')
-            ->get();
+            ->paginate(10);
 
         return view('approval.index', [
             'pendingUsersCount' => $pendingUsersCount,

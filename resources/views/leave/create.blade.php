@@ -5,8 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <div class="space-y-6">
             <div class="bg-white shadow sm:rounded-lg overflow-hidden pb-8 border border-[#0B4A85]/15">
                 <div class="px-6 py-4 border-b border-[#0B4A85]/15 bg-[#E7EFF6]">
                     <h3 class="text-lg font-medium text-navy-primary flex items-center">
@@ -145,7 +144,6 @@
                     </form>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Client-Side Validation and Upload Script -->
