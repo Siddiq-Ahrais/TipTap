@@ -29,6 +29,7 @@
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-5" @submit="isSubmitting = true">
                     @csrf
+                    <input type="hidden" name="login_type" value="admin">
 
                     <div>
                         <label for="email" class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
