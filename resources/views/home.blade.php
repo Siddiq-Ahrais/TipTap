@@ -30,7 +30,7 @@
                     <a href="{{ route('login') }}" class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-6 py-3 font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
                         Login
                     </a>
-                    <a href="{{ route('about') }}" class="inline-flex items-center rounded-xl px-6 py-3 font-semibold text-dark-slate/70 transition-transform duration-200 hover:scale-105 hover:text-navy-primary">
+                    <a href="{{ route('about') }}" class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-6 py-3 font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
                         About
                     </a>
                 @endauth
