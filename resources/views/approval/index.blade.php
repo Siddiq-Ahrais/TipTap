@@ -26,23 +26,13 @@
             </div>
         @endif
 
-        <section class="rounded-2xl border border-[#0B4A85]/20 bg-white p-5 shadow-sm">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Today's Attendance Stat</p>
-                    <h3 class="mt-1 font-display text-2xl font-bold text-slate-900">{{ $clockedInTodayCount }}/{{ $totalEmployeeCount }}</h3>
-                </div>
-                <p class="text-sm text-slate-600">Employees clocked in today out of total registered employees.</p>
-            </div>
-        </section>
-
         {{-- Today's Attendance Table --}}
         <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <header class="bg-[#0B4A85] text-white">
                 <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h3 class="font-display text-lg font-semibold">Today's Attendance</h3>
-                        <p class="text-sm text-white/85">Employees ranked by earliest clock-in time</p>
+                        <p class="text-sm text-white/85">{{ $clockedInTodayCount }}/{{ $totalEmployeeCount }} employees clocked in &middot; ranked by earliest clock-in time</p>
                     </div>
                     <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                         {{ $todayAttendances->count() }} {{ Str::plural('record', $todayAttendances->count()) }}

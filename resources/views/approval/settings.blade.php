@@ -31,7 +31,7 @@
             </div>
         @endif
 
-        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 border border-[#0B4A85]/15">
+        <section class="bg-white rounded-xl shadow-sm p-8 border border-[#0B4A85]/15">
             <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Company Settings</h3>
             <p class="mt-1 text-sm text-slate-500">Customize allowed company email domain and office attendance timing.</p>
 
