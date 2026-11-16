@@ -1,0 +1,352 @@
+<!-- DASHBOARD ROUTE (ADMIN OR EMPLOYEE) -->
+<template x-if="route.name === 'dashboard' && currentUser">
+    <div class="space-y-6">
+        <!-- ADMIN DASHBOARD -->
+        <template x-if="isAdmin()">
+            <div class="space-y-6">
+                <!-- Payroll Export Utility -->
+                <section class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 sm:p-6">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-[#0B4A85]">Payroll Export Utility</h3>
+                            <p class="mt-1 text-sm text-slate-500">Generate attendance recap for payroll processing.</p>
+                        </div>
+
+                        <div class="grid w-full gap-3 sm:grid-cols-3 lg:w-auto">
+                            <label class="text-sm font-medium text-slate-600">
+                                <span class="mb-1.5 block">Month</span>
+                                <select x-model="payrollExport.month"
+                                    class="w-full rounded-lg border border-[#0B4A85]/35 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/25">
+                                    <template x-for="m in monthOptions" :key="m.value">
+                                        <option :value="m.value" x-text="m.label"></option>
+                                    </template>
+                                </select>
+                            </label>
+
+                            <label class="text-sm font-medium text-slate-600">
+                                <span class="mb-1.5 block">Year</span>
+                                <select x-model="payrollExport.year"
+                                    class="w-full rounded-lg border border-[#0B4A85]/35 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/25">
+                                    <template x-for="y in yearOptions" :key="y">
+                                        <option :value="String(y)" x-text="y"></option>
+                                    </template>
+                                </select>
+                            </label>
+
+                            <button type="button" @click="exportExcel('monthly', payrollExport.month, payrollExport.year)"
+                                class="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B4A85] px-5 py-2.5 font-medium text-white transition-all hover:shadow-lg hover:bg-[#063157]">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M3 14.5A1.5 1.5 0 014.5 13h1a1 1 0 000-2h-1A3.5 3.5 0 001 14.5v1A3.5 3.5 0 004.5 19h11a3.5 3.5 0 003.5-3.5v-1a3.5 3.5 0 00-3.5-3.5h-1a1 1 0 000 2h1a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 013 15.5v-1z" />
+                                    <path d="M9 1.5a1 1 0 112 0V10l2.3-2.3a1 1 0 111.4 1.4l-4 4a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L9 10V1.5z" />
+                                </svg>
+                                Export to Payroll (Excel)
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary KPI Cards -->
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <template x-for="card in adminStats().summaryCards" :key="card.label">
+                        <article class="relative overflow-hidden bg-white shadow-sm rounded-xl p-6 border border-gray-100 border-l-4" :class="card.accent">
+                            <p class="text-sm font-medium text-slate-500 uppercase tracking-wider" x-text="card.label"></p>
+                            <p class="mt-3 text-4xl font-extrabold text-[#0B4A85]" x-text="card.value"></p>
+                            <p class="mt-2 text-sm text-slate-500" x-text="card.helper"></p>
+                        </article>
+                    </template>
+                </section>
+
+                <!-- Pending Registrations Table -->
+                <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <header class="bg-[#0B4A85] text-white">
+                        <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <h3 class="font-display text-lg font-semibold">Pending Registrations</h3>
+                            <p class="text-sm text-white/85">Review new employee account requests</p>
+                        </div>
+                    </header>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-100 text-slate-700">
+                                <tr>
+                                    <th class="p-4 text-left font-semibold">Name</th>
+                                    <th class="p-4 text-left font-semibold">Email</th>
+                                    <th class="p-4 text-left font-semibold">Department</th>
+                                    <th class="p-4 text-left font-semibold">Registered</th>
+                                    <th class="p-4 text-left font-semibold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="u in adminStats().pendingUsers" :key="u.id">
+                                    <tr class="border-b border-gray-200 hover:bg-slate-50">
+                                        <td class="p-4 font-medium text-slate-800" x-text="u.name"></td>
+                                        <td class="p-4 text-slate-600" x-text="u.email"></td>
+                                        <td class="p-4 text-slate-600" x-text="u.divisi || 'Operations'"></td>
+                                        <td class="p-4 text-slate-600" x-text="formatDateTime(u.created_at)"></td>
+                                        <td class="p-4">
+                                            <div class="flex flex-wrap gap-2">
+                                                <button type="button" @click="approveUser(u.id)"
+                                                    class="bg-[#0B4A85] text-white px-4 py-2 rounded shadow-sm hover:bg-[#063157] transition">Approve</button>
+                                                <button type="button" @click="rejectUser(u.id)"
+                                                    class="border border-[#0B4A85] text-[#0B4A85] px-4 py-2 rounded hover:bg-slate-100 transition">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="adminStats().pendingUsers.length === 0">
+                                    <tr>
+                                        <td colspan="5" class="p-6 text-center text-slate-500">No pending registrations right now.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Leave Approval & Global Settings -->
+                <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+                    <article class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Leave Request Approval</h3>
+                                <p class="mt-1 text-sm text-slate-500">Review and decide employee leave submissions.</p>
+                            </div>
+                            <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]"
+                                x-text="adminStats().pendingLeaves.length + ' Requests'"></span>
+                        </div>
+
+                        <div class="mt-5 space-y-3">
+                            <template x-for="req in adminStats().pendingLeaves" :key="req.id">
+                                <div class="rounded-lg border border-slate-200 p-4 hover:border-[#0B4A85]/40 transition-colors">
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <p class="font-semibold text-slate-800" x-text="userNameById(req.user_id)"></p>
+                                            <p class="mt-1 text-sm text-slate-500"
+                                                x-text="req.jenis_izin + ' · ' + formatDate(req.tanggal_mulai) + ' - ' + formatDate(req.tanggal_selesai)"></p>
+                                            <p class="mt-2 text-sm text-slate-600" x-text="req.alasan"></p>
+                                        </div>
+                                        <button type="button" @click="openLeaveReview(req)"
+                                            class="bg-[#0B4A85] text-white px-4 py-2 rounded shadow-sm hover:bg-[#063157] transition">Review</button>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="adminStats().pendingLeaves.length === 0">
+                                <div class="rounded-lg border border-dashed border-slate-300 p-6 text-center text-slate-500">
+                                    No leave requests pending review.
+                                </div>
+                            </template>
+                        </div>
+                    </article>
+
+                    <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Global Settings</h3>
+                        <p class="mt-1 text-sm text-slate-500">Configure office-wide attendance timing.</p>
+
+                        <form class="mt-6 space-y-5" @submit.prevent="saveQuickHours()">
+                            <div>
+                                <label for="quick_check_in" class="mb-1.5 block text-sm font-medium text-slate-600">Office Check-In Time</label>
+                                <input id="quick_check_in" type="time" x-model="settingsForm.jam_masuk_kantor"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-[#0B4A85] focus:border-[#0B4A85] outline-none" />
+                            </div>
+                            <div>
+                                <label for="quick_check_out" class="mb-1.5 block text-sm font-medium text-slate-600">Office Check-Out Time</label>
+                                <input id="quick_check_out" type="time" x-model="settingsForm.jam_mulai_pulang"
+                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-[#0B4A85] focus:border-[#0B4A85] outline-none" />
+                            </div>
+                            <button type="submit" class="w-full rounded-lg bg-[#0B4A85] px-4 py-3 font-semibold text-white transition hover:bg-[#063157]">
+                                Save Changes
+                            </button>
+                        </form>
+                    </article>
+                </section>
+            </div>
+        </template>
+
+        <!-- EMPLOYEE DASHBOARD -->
+        <template x-if="!isAdmin()">
+            <div class="space-y-6" x-data="{ showClockOutModal: false }">
+                <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                    <!-- Employee Identity Card -->
+                    <section class="card-soft rounded-3xl p-6 sm:p-7">
+                        <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="grid h-16 w-16 place-items-center rounded-2xl bg-navy-primary text-2xl font-semibold text-white ring-4 ring-white/80"
+                                    x-text="currentUser.name.slice(0, 1).toUpperCase()"></div>
+                                <div>
+                                    <h3 class="font-display text-2xl font-semibold text-navy-primary" x-text="currentUser.name"></h3>
+                                    <p class="text-sm text-slate-500" x-text="(currentUser.role || 'Employee') + ' · ' + (currentUser.divisi || 'Operations')"></p>
+                                </div>
+                            </div>
+
+                            <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]"
+                                :class="statusPillBadgeClass(employeeDashboard().statusMeta.tone)">
+                                <span class="h-2 w-2 rounded-full" :class="statusPillDotClass(employeeDashboard().statusMeta.tone)"></span>
+                                <span x-text="employeeDashboard().statusMeta.label"></span>
+                            </span>
+                        </div>
+
+                        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                            <div class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-3">
+                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Employee ID</p>
+                                <p class="mt-1 text-sm font-semibold text-slate-800" x-text="formatEmployeeCode(currentUser.id)"></p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-3">
+                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Work Email</p>
+                                <p class="mt-1 text-sm font-semibold text-slate-800" x-text="currentUser.email"></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Today's Attendance Status & Action Card -->
+                    <section class="card-soft rounded-3xl p-6 sm:p-7">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Today's Attendance Status</p>
+                        <div class="mt-4">
+                            <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]"
+                                :class="statusPillBadgeClass(employeeDashboard().statusMeta.tone)">
+                                <span class="h-2 w-2 rounded-full" :class="statusPillDotClass(employeeDashboard().statusMeta.tone)"></span>
+                                <span x-text="employeeDashboard().statusMeta.label"></span>
+                            </span>
+                        </div>
+
+                        <p class="mt-4 text-sm leading-6 text-slate-600" x-text="employeeDashboard().statusMeta.description"></p>
+
+                        <div class="mt-6">
+                            <template x-if="employeeDashboard().canClockIn">
+                                <button type="button" @click="clockIn()"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border border-[#0B4A85] bg-[#0B4A85] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/35 focus:ring-offset-2">
+                                    Clock In
+                                </button>
+                            </template>
+
+                            <template x-if="employeeDashboard().canAttemptClockOut">
+                                <button type="button" @click="showClockOutModal = true"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl border border-[#0B4A85] bg-[#0B4A85] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-navy-primary/30 focus:ring-offset-2"
+                                    x-text="employeeDashboard().requiresClockOutApproval ? 'Request Clock Out' : 'Clock Out'">
+                                </button>
+                            </template>
+
+                            <template x-if="!employeeDashboard().canClockIn && !employeeDashboard().canAttemptClockOut && employeeDashboard().statusKey === 'pending'">
+                                <button type="button" disabled
+                                    class="inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-amber-800">
+                                    Waiting Admin Approval
+                                </button>
+                            </template>
+
+                            <template x-if="!employeeDashboard().canClockIn && !employeeDashboard().canAttemptClockOut && employeeDashboard().statusKey !== 'pending'">
+                                <button type="button" disabled
+                                    class="inline-flex w-full cursor-not-allowed items-center justify-center rounded-2xl border border-slate-400 bg-slate-400 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                                    <span x-text="employeeDashboard().statusKey === 'day_off' ? 'Day Off — No Clock-In Required' : 'Attendance Completed'"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <p class="mt-3 text-xs text-slate-500">
+                            <template x-if="employeeDashboard().statusKey === 'pending'">
+                                <span>Your clock-out request has been submitted and is waiting for admin decision.</span>
+                            </template>
+                            <template x-if="employeeDashboard().canAttemptClockOut">
+                                <span>You can request clock-out anytime. Admin approval is required before leaving.</span>
+                            </template>
+                            <template x-if="employeeDashboard().canClockIn">
+                                <span x-text="'Office start time is ' + state.settings.jam_masuk_kantor + '. Clocking in after this time is marked as Late.'"></span>
+                            </template>
+                        </p>
+
+                        <!-- Clock Out Confirmation Modal -->
+                        <div x-cloak x-show="showClockOutModal" x-transition.opacity
+                            class="fixed inset-0 z-[70] flex items-center justify-center bg-[#031936]/60 p-4 backdrop-blur-sm">
+                            <div class="w-full max-w-md overflow-hidden rounded-3xl border border-[#0B4A85]/25 bg-white shadow-[0_24px_60px_rgba(3,25,54,0.35)]"
+                                @click.away="showClockOutModal = false">
+                                <div class="bg-gradient-to-r from-[#0B4A85] to-[#0E5AA6] px-6 py-4 text-white">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Clock Out Confirmation</p>
+                                    <h4 class="mt-1 font-display text-xl font-semibold">Are you sure want to clock out?</h4>
+                                </div>
+                                <div class="space-y-6 px-6 py-5">
+                                    <p class="text-sm leading-6 text-slate-600">
+                                        This action will send your clock-out request to admin for approval.
+                                    </p>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" @click="showClockOutModal = false"
+                                            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                                            No
+                                        </button>
+                                        <button type="button" @click="showClockOutModal = false; clockOut()"
+                                            class="inline-flex items-center justify-center rounded-xl border border-[#0B4A85] bg-[#0B4A85] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#083765]">
+                                            Yes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- 3 Metric Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <template x-for="metric in employeeDashboard().metrics" :key="metric.label">
+                        <div class="card-soft rounded-3xl p-5">
+                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500" x-text="metric.label"></p>
+                            <p class="mt-3 font-display text-3xl font-semibold text-slate-900" x-text="metric.value"></p>
+                            <p class="mt-1 text-sm text-slate-500" x-text="metric.caption"></p>
+                            <span class="mt-3 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+                                :class="metricTrendClass(metric.trendDirection)" x-text="metric.trend"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Recent Attendance Activity -->
+                <section class="card-soft rounded-3xl p-6 sm:p-7">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="font-display text-xl font-semibold text-navy-primary">Recent Attendance Activity</h3>
+                            <p class="text-sm text-slate-500">Latest records from your attendance timeline.</p>
+                        </div>
+
+                        <a href="/attendance/history" @click.prevent="navigate('/attendance/history')"
+                            class="inline-flex items-center rounded-xl border border-navy-primary/30 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-navy-primary transition hover:bg-navy-primary/5">
+                            View Full History
+                        </a>
+                    </div>
+
+                    <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white/75">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                <thead class="bg-slate-50/80">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock In</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Clock Out</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <template x-for="row in employeeDashboard().recentRows" :key="row.id">
+                                        <tr class="bg-white/70">
+                                            <td class="px-4 py-3 font-medium text-slate-700" x-text="formatDate(row.tanggal)"></td>
+                                            <td class="px-4 py-3 text-slate-600" x-text="row.waktu_masuk || '-'"></td>
+                                            <td class="px-4 py-3 text-slate-600" x-text="row.waktu_keluar || '-'"></td>
+                                            <td class="px-4 py-3">
+                                                <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em]"
+                                                    :class="statusPillBadgeClass(resolveAttendanceBadge(row).tone)">
+                                                    <span class="h-2 w-2 rounded-full" :class="statusPillDotClass(resolveAttendanceBadge(row).tone)"></span>
+                                                    <span x-text="resolveAttendanceBadge(row).label"></span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-if="employeeDashboard().recentRows.length === 0">
+                                        <tr>
+                                            <td colspan="4" class="px-4 py-9 text-center text-sm text-slate-500">
+                                                No attendance history yet. Your next check-in will appear in this table.
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </template>
+    </div>
+</template>

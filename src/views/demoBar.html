@@ -1,0 +1,45 @@
+<!-- PRESENTATION DEMO BAR -->
+<div class="bg-[#031936] text-slate-100 border-b border-white/15 text-xs">
+    <div class="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-[#11A582]/20 border border-[#11A582]/40 px-2.5 py-0.5 font-semibold text-emerald-300">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                Presentation Mode
+            </span>
+            <span class="hidden sm:inline text-slate-300">
+                Interactive flow demo (saved locally in this browser)
+                <template x-if="currentUser">
+                    <span class="text-white font-medium" x-text="' · Active: ' + currentUser.name + ' (' + currentUser.role + ')'"></span>
+                </template>
+            </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-slate-400 mr-1 hidden md:inline">Switch View:</span>
+            <button type="button" @click="switchPersona('guest')"
+                class="rounded-md px-2.5 py-1 font-medium transition"
+                :class="!currentUser ? 'bg-white text-[#072C50]' : 'bg-white/10 text-slate-200 hover:bg-white/20'">
+                Guest
+            </button>
+            <button type="button" @click="switchPersona('budi.santoso@tiptap.id')"
+                class="rounded-md px-2.5 py-1 font-medium transition"
+                :class="currentUser?.email === 'budi.santoso@tiptap.id' ? 'bg-white text-[#072C50]' : 'bg-white/10 text-slate-200 hover:bg-white/20'">
+                Employee (Budi)
+            </button>
+            <button type="button" @click="switchPersona('superadmin@tiptap.com')"
+                class="rounded-md px-2.5 py-1 font-medium transition"
+                :class="currentUser?.email === 'superadmin@tiptap.com' ? 'bg-white text-[#072C50]' : 'bg-white/10 text-slate-200 hover:bg-white/20'">
+                Super Admin
+            </button>
+            <button type="button" @click="switchPersona('alpha@tiptap.id')"
+                class="rounded-md px-2.5 py-1 font-medium transition"
+                :class="currentUser?.email === 'alpha@tiptap.id' ? 'bg-amber-300 text-slate-900' : 'bg-amber-400/15 text-amber-200 hover:bg-amber-400/25'">
+                Alpha Dev
+            </button>
+            <button type="button" @click="resetDemo()"
+                class="ml-1 rounded-md border border-rose-400/40 bg-rose-500/20 px-2.5 py-1 font-medium text-rose-200 transition hover:bg-rose-500/35">
+                Reset Demo
+            </button>
+        </div>
+    </div>
+</div>

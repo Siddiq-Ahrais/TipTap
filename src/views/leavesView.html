@@ -1,0 +1,279 @@
+<!-- LEAVES INDEX ROUTE -->
+<template x-if="route.name === 'leavesIndex' && currentUser">
+    <div class="space-y-6">
+        <div class="bg-white shadow sm:rounded-lg p-4 border border-[#0B4A85]/15">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-2">
+                    <label for="leave_status_filter" class="text-sm font-medium text-dark-slate">Filter by Status:</label>
+                    <select id="leave_status_filter" x-model="leaveFilterStatus"
+                        class="block w-full pl-3 pr-10 py-2 text-base border-[#0B4A85]/25 focus:outline-none focus:ring-[#0B4A85] focus:border-[#0B4A85] sm:text-sm rounded-md">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <a href="/leaves/create" @click.prevent="navigate('/leaves/create')"
+                    class="inline-flex items-center justify-center gap-2 rounded-md bg-[#0B4A85] border border-[#0B4A85] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#063157]">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Request Leave
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-[#0B4A85]/15">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-[#0B4A85]">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Submission Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Leave Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Duration</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                            <th class="relative px-6 py-3"><span class="sr-only">Details</span></th>
+                        </tr>
+                    </thead>
+                    <template x-for="leave in filteredUserLeaves()" :key="leave.id">
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr @click="expandedLeaveId = expandedLeaveId === leave.id ? null : leave.id"
+                                class="cursor-pointer transition-all duration-200 hover:bg-navy-light/70">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span x-text="formatMonthDayYear(leave.created_at)"></span>
+                                    <div class="text-xs text-gray-500" x-text="formatTimeAmPm(leave.created_at)"></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="leave.jenis_izin"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span x-text="formatMonthDay(leave.tanggal_mulai) + ' - ' + formatMonthDayYear(leave.tanggal_selesai)"></span>
+                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#E7EFF6] text-[#063157] border border-[#0B4A85]/20"
+                                        x-text="inclusiveDays(leave.tanggal_mulai, leave.tanggal_selesai) + (inclusiveDays(leave.tanggal_mulai, leave.tanggal_selesai) === 1 ? ' day' : ' days')"></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                                        :class="leaveStatusBadgeClass(leave.status_approval)">
+                                        <span class="mr-1.5 h-2 w-2 rounded-full" :class="leaveStatusDotClass(leave.status_approval)"></span>
+                                        <span x-text="leave.status_approval"></span>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button type="button" class="text-navy-primary hover:text-[#063157]">
+                                        View Details
+                                        <svg class="w-4 h-4 inline transform transition-transform duration-200"
+                                            :class="expandedLeaveId === leave.id ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr x-show="expandedLeaveId === leave.id" class="bg-navy-light/40 border-b border-[#0B4A85]/10">
+                                <td colspan="5" class="px-6 py-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-gray-900 mb-2">Reason for Absence</h4>
+                                            <p class="text-sm text-gray-700 p-3 bg-white rounded-md border border-[#0B4A85]/15 shadow-sm whitespace-pre-wrap" x-text="leave.alasan"></p>
+
+                                            <template x-if="String(leave.status_approval).toLowerCase() === 'rejected'">
+                                                <div>
+                                                    <h4 class="text-sm font-bold text-rose-700 mt-4 mb-2">Rejection Reason</h4>
+                                                    <p class="text-sm text-rose-700 p-3 bg-rose-50 rounded-md border border-rose-300 shadow-sm whitespace-pre-wrap"
+                                                        x-text="leave.rejection_reason || 'No detailed reason provided.'"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="text-sm font-bold text-gray-900 mb-2">Supporting Document</h4>
+                                            <template x-if="leave.bukti_file">
+                                                <div class="space-y-3">
+                                                    <div class="flex items-center space-x-3 p-3 bg-white rounded-md border border-[#0B4A85]/15 shadow-sm">
+                                                        <div class="flex-1 min-w-0">
+                                                            <p class="text-sm font-medium text-gray-900 truncate" x-text="leave.bukti_file.name"></p>
+                                                            <p class="text-xs text-gray-500" x-text="formatBytes(leave.bukti_file.size)"></p>
+                                                        </div>
+                                                        <template x-if="leave.bukti_file.previewUrl">
+                                                            <a :href="leave.bukti_file.previewUrl" target="_blank" rel="noopener"
+                                                                class="inline-flex items-center px-2.5 py-1.5 border border-navy-primary/30 shadow-sm text-xs font-medium rounded text-navy-primary bg-white hover:bg-navy-primary/5">
+                                                                View
+                                                            </a>
+                                                        </template>
+                                                    </div>
+                                                    <template x-if="leave.bukti_file.previewUrl && String(leave.bukti_file.type).startsWith('image/')">
+                                                        <img :src="leave.bukti_file.previewUrl" alt="Supporting document" class="max-h-44 rounded-lg border border-slate-200 object-contain bg-white" />
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="!leave.bukti_file">
+                                                <p class="text-sm text-gray-500 italic mt-2">No attachments provided.</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </template>
+
+                    <template x-if="filteredUserLeaves().length === 0">
+                        <tbody class="bg-white">
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                    <p class="text-lg font-medium">No leave records found</p>
+                                    <p class="text-sm">You haven't submitted any leave requests matching this filter.</p>
+                                    <a href="/leaves/create" @click.prevent="navigate('/leaves/create')" class="mt-4 inline-block text-navy-primary hover:text-[#063157] font-medium">
+                                        Submit your first request &rarr;
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </template>
+                </table>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- LEAVES CREATE ROUTE -->
+<template x-if="route.name === 'leavesCreate' && currentUser">
+    <div class="space-y-6">
+        <div class="bg-white shadow sm:rounded-lg overflow-hidden pb-8 border border-[#0B4A85]/15">
+            <div class="px-6 py-4 border-b border-[#0B4A85]/15 bg-[#E7EFF6]">
+                <h3 class="text-lg font-medium text-navy-primary flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-[#0B4A85]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Absence Request Form
+                </h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Please fill out the form below to submit your leave request. Ensure all details are accurate.
+                </p>
+            </div>
+
+            <div class="px-6 mt-6">
+                <template x-if="leaveForm.errors.length > 0">
+                    <div class="mb-4 bg-rose-50 border border-rose-300 text-rose-700 px-4 py-3 rounded">
+                        <strong>There were some issues with your submission:</strong>
+                        <ul class="list-disc mt-2 ml-4 text-sm">
+                            <template x-for="(err, idx) in leaveForm.errors" :key="idx">
+                                <li x-text="err"></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                <form @submit.prevent="submitLeaveForm()" class="space-y-6">
+                    <!-- Leave Quota Banner -->
+                    <div class="rounded-lg border p-4 flex items-center justify-between"
+                        :class="leaveQuotaInfo().remaining > 0 ? 'border-[#0B4A85]/20 bg-[#E7EFF6]' : 'border-rose-300 bg-rose-50'">
+                        <div>
+                            <p class="text-sm font-semibold" :class="leaveQuotaInfo().remaining > 0 ? 'text-[#0B4A85]' : 'text-rose-700'">Leave Quota</p>
+                            <p class="text-xs" :class="leaveQuotaInfo().remaining > 0 ? 'text-slate-600' : 'text-rose-600'"
+                                x-text="leaveQuotaInfo().used + ' of ' + leaveQuotaInfo().total + ' days used this year'"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold" :class="leaveQuotaInfo().remaining > 0 ? 'text-[#0B4A85]' : 'text-rose-700'" x-text="leaveQuotaInfo().remaining"></p>
+                            <p class="text-xs" :class="leaveQuotaInfo().remaining > 0 ? 'text-slate-500' : 'text-rose-500'">days remaining</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="leave_jenis" class="block text-sm font-medium text-gray-700">Leave Type / Category <span class="text-rose-600">*</span></label>
+                        <select id="leave_jenis" x-model="leaveForm.jenis_izin" required
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-[#0B4A85]/25 focus:outline-none focus:ring-[#0B4A85] focus:border-[#0B4A85] sm:text-sm rounded-md">
+                            <option value="" disabled>Select category...</option>
+                            <option value="Cuti Tahunan">Cuti Tahunan (Annual Leave)</option>
+                            <option value="Sakit">Sakit (Sick Leave)</option>
+                            <option value="Keperluan Mendadak">Keperluan Mendadak (Emergency)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="leave_start" class="block text-sm font-medium text-gray-700">Start Date <span class="text-rose-600">*</span></label>
+                            <input id="leave_start" type="date" x-model="leaveForm.tanggal_mulai" :min="todayDate()" required
+                                @change="if (leaveForm.tanggal_selesai && leaveForm.tanggal_selesai < leaveForm.tanggal_mulai) leaveForm.tanggal_selesai = leaveForm.tanggal_mulai"
+                                class="mt-1 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md" />
+                        </div>
+                        <div>
+                            <label for="leave_end" class="block text-sm font-medium text-gray-700">End Date <span class="text-rose-600">*</span></label>
+                            <input id="leave_end" type="date" x-model="leaveForm.tanggal_selesai" :min="leaveForm.tanggal_mulai || todayDate()" required
+                                class="mt-1 focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="leave_reason" class="block text-sm font-medium text-gray-700">Reason / Description <span class="text-rose-600">*</span></label>
+                        <textarea id="leave_reason" x-model="leaveForm.alasan" rows="4" required
+                            placeholder="Provide a brief explanation for your absence..."
+                            class="mt-1 shadow-sm focus:ring-[#0B4A85] focus:border-[#0B4A85] block w-full sm:text-sm border-[#0B4A85]/25 rounded-md"></textarea>
+                    </div>
+
+                    <div x-show="leaveForm.jenis_izin !== ''">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Medical Certificate / Supporting Document
+                            <span x-show="leaveForm.jenis_izin === 'Sakit'" class="text-rose-600">*</span>
+                        </label>
+
+                        <div @dragover.prevent="leaveForm.dragging = true"
+                             @dragleave.prevent="leaveForm.dragging = false"
+                             @drop.prevent="leaveForm.dragging = false; handleLeaveFile($event.dataTransfer.files[0])"
+                             :class="leaveForm.dragging ? 'border-navy-primary bg-navy-light' : 'border-[#0B4A85]/35'"
+                             class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-[#0B4A85] hover:bg-[#E7EFF6] relative">
+
+                            <template x-if="!leaveForm.attachment">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-[#0B4A85]/60" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label for="leave_file_input" class="relative cursor-pointer bg-white rounded-md font-medium text-[#0B4A85] hover:text-[#063157] px-1">
+                                            <span>Upload a file</span>
+                                            <input id="leave_file_input" type="file" class="sr-only" accept=".pdf,.jpg,.jpeg,.png"
+                                                @change="handleLeaveFile($event.target.files[0])">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PDF, PNG, JPG up to 5MB</p>
+                                </div>
+                            </template>
+
+                            <template x-if="leaveForm.attachment">
+                                <div class="w-full flex items-center justify-between bg-[#E7EFF6]/60 p-4 rounded-md">
+                                    <div class="flex items-center space-x-3 overflow-hidden">
+                                        <div class="flex-shrink-0 h-10 w-10 text-gray-400 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                                            <template x-if="leaveForm.attachment.previewUrl && String(leaveForm.attachment.type).startsWith('image/')">
+                                                <img :src="leaveForm.attachment.previewUrl" class="h-full w-full object-cover rounded" alt="preview" />
+                                            </template>
+                                            <template x-if="!leaveForm.attachment.previewUrl || !String(leaveForm.attachment.type).startsWith('image/')">
+                                                <span class="text-xs font-bold text-rose-600">DOC</span>
+                                            </template>
+                                        </div>
+                                        <div class="truncate">
+                                            <p class="text-sm font-medium text-gray-900 truncate" x-text="leaveForm.attachment.name"></p>
+                                            <p class="text-xs text-gray-500" x-text="formatBytes(leaveForm.attachment.size)"></p>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="leaveForm.attachment = null"
+                                        class="ml-4 flex-shrink-0 bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-full transition-colors">
+                                        Remove
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="pt-5 border-t border-gray-200 flex justify-end gap-3">
+                        <a href="/leaves" @click.prevent="navigate('/leaves')"
+                            class="bg-white py-2 px-4 border border-[#0B4A85] rounded-md shadow-sm text-sm font-medium text-[#0B4A85] hover:bg-[#E7EFF6]">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#0B4A85] hover:bg-[#063157]">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</template>

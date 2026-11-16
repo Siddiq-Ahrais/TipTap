@@ -1,0 +1,386 @@
+<div x-show="isGuestLayout()" x-cloak class="min-h-screen flex flex-col antialiased"
+    :class="route.name === 'adminLogin' ? 'bg-[#063157] text-slate-100' : 'bg-slate-50 text-dark-slate'">
+
+    <!-- Guest Header -->
+    <header class="sticky top-0 z-30 border-b backdrop-blur"
+        :class="route.name === 'adminLogin' ? 'border-slate-100/10 bg-[#063157]/90' : 'border-[#0B4A85]/15 bg-white/90'">
+        <div class="flex h-16 w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
+            <a href="/" @click.prevent="navigate('/')"
+                class="shrink-0 text-xl font-extrabold tracking-tight"
+                :class="route.name === 'adminLogin' ? 'text-slate-100' : 'text-navy-primary'">TipTap</a>
+
+            <div class="flex min-w-0 items-center justify-end gap-2 sm:gap-4">
+                <nav class="flex items-center gap-3 text-sm sm:gap-6">
+                    <template x-for="item in guestNavItems()" :key="item.route">
+                        <a :href="item.path" @click.prevent="navigate(item.path)"
+                            class="group relative px-1 py-2 font-medium transition-colors duration-200"
+                            :class="route.name === item.route
+                                ? (route.name === 'adminLogin' ? 'text-white' : 'text-navy-primary')
+                                : (route.name === 'adminLogin' ? 'text-slate-200/85 hover:text-white' : 'text-dark-slate/80 hover:text-navy-primary')">
+                            <span x-text="item.label"></span>
+                            <span class="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full transition-all duration-200"
+                                :class="[
+                                    route.name === 'adminLogin' ? 'bg-white' : 'bg-navy-primary',
+                                    route.name === item.route ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                                ]"></span>
+                        </a>
+                    </template>
+                </nav>
+
+                <a x-show="route.name !== 'adminLogin'" href="/admin/login" @click.prevent="navigate('/admin/login')"
+                    class="inline-flex shrink-0 items-center rounded-lg bg-navy-primary px-2.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-navy-primary/30 transition-colors duration-200 hover:bg-navy-dark sm:px-3.5 sm:py-2 sm:text-sm">
+                    Admin Login
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Guest Main -->
+    <main class="relative flex-1 overflow-hidden">
+        <template x-if="route.name !== 'adminLogin'">
+            <div>
+                <div class="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-navy-light blur-3xl"></div>
+                <div class="pointer-events-none absolute -right-20 top-1/3 h-72 w-72 rounded-full bg-navy-primary/10 blur-3xl"></div>
+            </div>
+        </template>
+
+        <div class="relative flex min-h-[calc(100vh-7rem)] w-full flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+            <!-- HOME -->
+            <template x-if="route.name === 'home'">
+                <section class="flex flex-grow items-center justify-center px-4">
+                    <div class="w-full max-w-3xl rounded-3xl border border-navy-primary/20 bg-white/95 p-8 text-center shadow-xl shadow-slate-200/50 sm:p-10">
+                        <p class="mb-3 inline-flex rounded-full border border-navy-primary/25 bg-navy-light px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-navy-primary">
+                            Smart Employee Workspace
+                        </p>
+
+                        <h1 class="mb-4 text-4xl font-extrabold tracking-tight text-navy-primary sm:text-5xl lg:text-6xl">
+                            Welcome to TipTap
+                        </h1>
+
+                        <p class="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-dark-slate/90">
+                            Streamline attendance, leave, and daily updates in one place with a clean and responsive employee portal.
+                        </p>
+
+                        <div class="mt-1 flex flex-wrap items-center justify-center gap-3">
+                            <template x-if="currentUser">
+                                <div class="flex flex-wrap items-center justify-center gap-3">
+                                    <a :href="isAlpha() ? '/alpha/settings' : '/dashboard'"
+                                        @click.prevent="navigate(isAlpha() ? '/alpha/settings' : '/dashboard')"
+                                        class="inline-flex items-center rounded-xl bg-navy-primary px-6 py-3 font-semibold text-white shadow-lg shadow-navy-primary/35 transition-transform duration-200 hover:scale-105 hover:bg-navy-dark">
+                                        Dashboard
+                                    </a>
+                                    <a href="/about" @click.prevent="navigate('/about')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-6 py-3 font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        About
+                                    </a>
+                                </div>
+                            </template>
+                            <template x-if="!currentUser">
+                                <div class="flex flex-wrap items-center justify-center gap-3">
+                                    <a href="/register" @click.prevent="navigate('/register')"
+                                        class="inline-flex items-center rounded-xl bg-navy-primary px-6 py-3 font-semibold text-white shadow-lg shadow-navy-primary/35 transition-transform duration-200 hover:scale-105 hover:bg-navy-dark">
+                                        Register
+                                    </a>
+                                    <a href="/login" @click.prevent="navigate('/login')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-6 py-3 font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        Login
+                                    </a>
+                                    <a href="/about" @click.prevent="navigate('/about')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-6 py-3 font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        About
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <!-- ABOUT -->
+            <template x-if="route.name === 'about'">
+                <section class="flex-grow flex items-center justify-center px-4">
+                    <div class="w-full max-w-3xl rounded-3xl border border-navy-primary/20 bg-white/95 p-8 text-center shadow-xl shadow-slate-200/50 sm:p-10">
+                        <h1 class="text-4xl font-extrabold tracking-tight text-navy-primary sm:text-5xl">About TipTap</h1>
+
+                        <p class="mt-4 text-base leading-7 text-dark-slate/90 sm:text-lg">
+                            TipTap helps teams stay in sync by combining attendance tracking, leave management,
+                            and daily communication in one responsive interface that is easy to use on desktop and mobile.
+                        </p>
+
+                        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <template x-if="currentUser">
+                                <div class="flex flex-wrap items-center justify-center gap-3">
+                                    <a :href="isAlpha() ? '/alpha/settings' : '/dashboard'"
+                                        @click.prevent="navigate(isAlpha() ? '/alpha/settings' : '/dashboard')"
+                                        class="inline-flex items-center rounded-xl bg-navy-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-navy-primary/35 transition-transform duration-200 hover:scale-105 hover:bg-navy-dark">
+                                        Dashboard
+                                    </a>
+                                    <a href="/" @click.prevent="navigate('/')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-5 py-2.5 text-sm font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        Home
+                                    </a>
+                                </div>
+                            </template>
+                            <template x-if="!currentUser">
+                                <div class="flex flex-wrap items-center justify-center gap-3">
+                                    <a href="/register" @click.prevent="navigate('/register')"
+                                        class="inline-flex items-center rounded-xl bg-navy-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-navy-primary/35 transition-transform duration-200 hover:scale-105 hover:bg-navy-dark">
+                                        Register
+                                    </a>
+                                    <a href="/login" @click.prevent="navigate('/login')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-5 py-2.5 text-sm font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        Login
+                                    </a>
+                                    <a href="/" @click.prevent="navigate('/')"
+                                        class="inline-flex items-center rounded-xl border-2 border-navy-primary bg-white px-5 py-2.5 text-sm font-semibold text-navy-primary transition-transform duration-200 hover:scale-105 hover:bg-navy-light">
+                                        Home
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <!-- EMPLOYEE LOGIN -->
+            <template x-if="route.name === 'login'">
+                <div class="flex-grow flex items-center justify-center">
+                    <div class="w-full max-w-md mx-auto">
+                        <div class="rounded-xl border border-[#0B4A85]/15 border-t-4 border-t-[#0B4A85] bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
+                            <template x-if="flashStatus">
+                                <div class="mb-5 rounded-lg border border-[#0B4A85]/25 bg-[#E7EFF6] px-4 py-3 text-sm text-[#0B4A85]" x-text="flashStatus"></div>
+                            </template>
+
+                            <h1 class="text-2xl font-bold text-center text-dark-slate">Employee Login</h1>
+                            <p class="text-sm text-gray-500 text-center mb-6">Welcome back. Please sign in to continue.</p>
+
+                            <form @submit.prevent="submitEmployeeLogin()" class="space-y-5">
+                                <div>
+                                    <label for="login_email" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-3 flex items-center text-[#0B4A85]/80 pointer-events-none">
+                                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path d="M2.94 5.5A2 2 0 014.75 4.5h10.5a2 2 0 011.81 1L10 9.97 2.94 5.5z" />
+                                                <path d="M2.5 7.2V14a2 2 0 002 2h11a2 2 0 002-2V7.2l-7.06 4.04a1 1 0 01-.98 0L2.5 7.2z" />
+                                            </svg>
+                                        </span>
+                                        <input id="login_email" type="email" x-model="loginForm.email" required autocomplete="username"
+                                            placeholder="you@tiptap.id"
+                                            class="w-full pl-10 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                    </div>
+                                    <p x-cloak x-show="loginForm.errors.email" x-text="loginForm.errors.email" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div>
+                                    <label for="login_password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-3 flex items-center text-[#0B4A85]/80 pointer-events-none">
+                                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M6 8V6a4 4 0 118 0v2h.5A1.5 1.5 0 0116 9.5v7a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 014 16.5v-7A1.5 1.5 0 015.5 8H6zm2 0h4V6a2 2 0 10-4 0v2z" clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
+                                        <input id="login_password" :type="loginForm.showPassword ? 'text' : 'password'" x-model="loginForm.password"
+                                            required autocomplete="current-password" placeholder="Enter your password"
+                                            class="w-full pl-10 pr-10 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                        <button type="button" @click="loginForm.showPassword = !loginForm.showPassword"
+                                            class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-dark-slate/60 hover:text-dark-slate/85">
+                                            <span class="text-xs font-medium" x-text="loginForm.showPassword ? 'Hide' : 'Show'"></span>
+                                        </button>
+                                    </div>
+                                    <p x-cloak x-show="loginForm.errors.password" x-text="loginForm.errors.password" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div class="flex items-center justify-end text-sm mb-6">
+                                    <a href="/forgot-password" @click.prevent="navigate('/forgot-password')"
+                                        class="text-navy-primary font-medium hover:underline hover:text-[#063157]">
+                                        Forgot Password?
+                                    </a>
+                                </div>
+
+                                <button type="submit" class="w-full bg-navy-primary text-white font-semibold py-3 rounded-lg hover:bg-[#063157] transition duration-200 mt-2">
+                                    LOGIN
+                                </button>
+                            </form>
+
+                            <!-- Presentation Quick Fill -->
+                            <div class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                                <p class="font-semibold text-slate-700">Presentation Quick-Fill:</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <button type="button" @click="fillEmployeeDemo('budi.santoso@tiptap.id')"
+                                        class="rounded-md border border-[#0B4A85]/25 bg-white px-2.5 py-1 font-medium text-[#0B4A85] hover:bg-[#E7EFF6]">
+                                        Budi (Ready to Clock In)
+                                    </button>
+                                    <button type="button" @click="fillEmployeeDemo('siti.rahma@tiptap.id')"
+                                        class="rounded-md border border-[#0B4A85]/25 bg-white px-2.5 py-1 font-medium text-[#0B4A85] hover:bg-[#E7EFF6]">
+                                        Siti (Clocked In)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p class="mt-5 text-center text-sm text-gray-600">
+                                New here?
+                                <a href="/register" @click.prevent="navigate('/register')" class="text-navy-primary font-medium hover:underline hover:text-[#063157]">Create an account</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ADMIN LOGIN -->
+            <template x-if="route.name === 'adminLogin'">
+                <div class="flex flex-grow items-center justify-center px-4 sm:px-6 lg:justify-end lg:px-10">
+                    <div class="w-full max-w-md">
+                        <div class="rounded-2xl border border-[#0B4A85]/25 border-t-4 border-t-[#0B4A85] bg-white p-6 shadow-2xl shadow-black/25 sm:p-8 text-slate-800">
+                            <div class="mb-6 text-center">
+                                <div class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#0B4A85] text-white">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="M12 3L5 6V11C5 16 8.4 20.5 12 21C15.6 20.5 19 16 19 11V6L12 3Z" stroke-width="1.8" stroke-linejoin="round" />
+                                        <path d="M9.5 11.8L11.2 13.5L14.8 9.9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <p class="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Restricted Area</p>
+                                <h1 class="mt-2 text-2xl font-extrabold text-[#0B4A85]">Administrative Portal</h1>
+                                <p class="mt-1 text-sm text-slate-500">Authorized personnel only.</p>
+                            </div>
+
+                            <form @submit.prevent="submitAdminLogin()" class="space-y-5">
+                                <div>
+                                    <label for="admin_email" class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+                                    <input id="admin_email" type="email" x-model="adminLoginForm.email" required
+                                        placeholder="superadmin@tiptap.com"
+                                        class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-slate-900 outline-none transition-all focus:border-[#0B4A85] focus:bg-white focus:ring-2 focus:ring-[#0B4A85]" />
+                                    <p x-cloak x-show="adminLoginForm.errors.email" x-text="adminLoginForm.errors.email" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div>
+                                    <label for="admin_password" class="mb-1.5 block text-sm font-medium text-slate-700">Password</label>
+                                    <div class="relative">
+                                        <input id="admin_password" :type="adminLoginForm.showPassword ? 'text' : 'password'" x-model="adminLoginForm.password"
+                                            required placeholder="Enter admin password"
+                                            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 pr-14 text-slate-900 outline-none transition-all focus:border-[#0B4A85] focus:bg-white focus:ring-2 focus:ring-[#0B4A85]" />
+                                        <button type="button" @click="adminLoginForm.showPassword = !adminLoginForm.showPassword"
+                                            class="absolute inset-y-0 right-3 flex items-center text-xs font-medium text-[#0B4A85]/75 hover:text-[#063157]">
+                                            <span x-text="adminLoginForm.showPassword ? 'Hide' : 'Show'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="mt-2 w-full rounded-lg bg-navy-primary py-3 font-semibold text-white transition duration-200 hover:bg-navy-dark">
+                                    LOGIN
+                                </button>
+                            </form>
+
+                            <div class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                                <p class="font-semibold text-slate-700">Presentation Quick-Fill:</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <button type="button" @click="fillAdminDemo('superadmin@tiptap.com')"
+                                        class="rounded-md border border-[#0B4A85]/25 bg-white px-2.5 py-1 font-medium text-[#0B4A85] hover:bg-[#E7EFF6]">
+                                        Super Admin
+                                    </button>
+                                    <button type="button" @click="fillAdminDemo('alpha@tiptap.id')"
+                                        class="rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 font-medium text-amber-800 hover:bg-amber-100">
+                                        Alpha Dev Panel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p class="mt-5 text-center text-sm text-slate-600">
+                                Need the standard employee sign in?
+                                <a href="/login" @click.prevent="navigate('/login')" class="font-medium text-[#0B4A85] hover:text-[#063157] hover:underline">Employee Login</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- REGISTER -->
+            <template x-if="route.name === 'register'">
+                <div class="flex-grow flex items-center justify-center">
+                    <div class="w-full max-w-md mx-auto">
+                        <div class="rounded-xl border border-[#0B4A85]/15 border-t-4 border-t-[#0B4A85] bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
+                            <h1 class="text-2xl font-bold text-center text-dark-slate">Create Account</h1>
+                            <p class="text-sm text-gray-500 text-center mb-6">Set up your TipTap account in a few steps.</p>
+
+                            <form @submit.prevent="submitRegister()" class="space-y-5">
+                                <div>
+                                    <label for="reg_name" class="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                                    <input id="reg_name" type="text" x-model="registerForm.name" required placeholder="Your full name"
+                                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                    <p x-cloak x-show="registerForm.errors.name" x-text="registerForm.errors.name" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div>
+                                    <label for="reg_username" class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                                    <div class="flex">
+                                        <input id="reg_username" type="text" x-model="registerForm.username"
+                                            @input="registerForm.username = registerForm.username.replace(/@/g, '')" required
+                                            placeholder="username"
+                                            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-l-lg rounded-r-none text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                        <span class="inline-flex items-center bg-gray-100 border border-l-0 border-gray-300 text-gray-500 text-sm font-medium rounded-r-lg px-3 select-none"
+                                            x-text="'@' + state.settings.company_email_domain"></span>
+                                    </div>
+                                    <p x-cloak x-show="registerForm.errors.username || registerForm.errors.email"
+                                        x-text="registerForm.errors.username || registerForm.errors.email"
+                                        class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div>
+                                    <label for="reg_password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                                    <input id="reg_password" type="password" x-model="registerForm.password" required placeholder="At least 8 characters"
+                                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                    <p x-cloak x-show="registerForm.errors.password" x-text="registerForm.errors.password" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <div>
+                                    <label for="reg_confirm" class="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+                                    <input id="reg_confirm" type="password" x-model="registerForm.confirmation" required placeholder="Repeat your password"
+                                        class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85] focus:bg-white outline-none transition-all" />
+                                    <p x-cloak x-show="registerForm.errors.password_confirmation" x-text="registerForm.errors.password_confirmation" class="mt-1.5 text-xs text-rose-600"></p>
+                                </div>
+
+                                <button type="submit" class="w-full bg-navy-primary text-white font-semibold py-3 rounded-lg hover:bg-[#063157] transition duration-200 mt-2">
+                                    REGISTER
+                                </button>
+                            </form>
+
+                            <p class="mt-6 text-center text-sm text-gray-600">
+                                Already registered?
+                                <a href="/login" @click.prevent="navigate('/login')" class="text-navy-primary font-medium hover:underline hover:text-[#063157]">Log in</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- FORGOT PASSWORD -->
+            <template x-if="route.name === 'forgotPassword'">
+                <div class="flex-grow flex items-center justify-center">
+                    <div class="w-full max-w-md mx-auto rounded-xl border border-[#0B4A85]/15 border-t-4 border-t-[#0B4A85] bg-white p-6 shadow-xl sm:p-8">
+                        <h1 class="text-xl font-bold text-dark-slate mb-2">Forgot Password</h1>
+                        <p class="mb-4 text-sm text-gray-600">
+                            Forgot your password? No problem. Enter your email address and we will simulate sending a password reset link.
+                        </p>
+
+                        <template x-if="forgotForm.sentMessage">
+                            <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" x-text="forgotForm.sentMessage"></div>
+                        </template>
+
+                        <form @submit.prevent="submitForgotPassword()" class="space-y-4">
+                            <div>
+                                <label for="forgot_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input id="forgot_email" type="email" x-model="forgotForm.email" required
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-[#0B4A85] focus:ring-2 focus:ring-[#0B4A85]" />
+                            </div>
+                            <div class="flex items-center justify-between pt-2">
+                                <a href="/login" @click.prevent="navigate('/login')" class="text-sm font-medium text-navy-primary hover:underline">Back to Login</a>
+                                <button type="submit" class="rounded-md bg-[#0B4A85] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#063157]">
+                                    Email Password Reset Link
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+</div>

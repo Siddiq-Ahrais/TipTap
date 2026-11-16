@@ -1,0 +1,247 @@
+<div x-show="!isGuestLayout() && currentUser" x-cloak class="workspace-shell relative min-h-screen overflow-x-clip">
+    <!-- Top Workspace / Alpha Navbar -->
+    <nav x-data="{ mobileNavOpen: false, profileOpen: false }" class="sticky top-0 z-40 border-b border-[#0A3E71] bg-navy-primary/95 backdrop-blur">
+        <div class="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-3">
+                <a :href="isAlpha() ? '/alpha/settings' : '/dashboard'"
+                    @click.prevent="navigate(isAlpha() ? '/alpha/settings' : '/dashboard')"
+                    class="grid h-10 w-10 place-items-center rounded-2xl bg-navy-primary text-white shadow-lg shadow-navy-primary/35">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 9.5L12 4L21 9.5V20H3V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                        <path d="M9 20V12H15V20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    </svg>
+                </a>
+                <div>
+                    <p class="font-display text-sm font-extrabold tracking-tight text-white" x-text="brandName()"></p>
+                    <p class="text-xs text-slate-100/85" x-text="isAlpha() ? 'Alpha Panel' : 'Employee Workspace'"></p>
+                </div>
+            </div>
+
+            <div class="hidden items-center gap-3 md:flex">
+                <span x-show="isAlpha()" class="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-xs font-semibold text-amber-300">
+                    DEV ONLY
+                </span>
+
+                <div class="relative" @click.outside="profileOpen = false">
+                    <button type="button" @click="profileOpen = !profileOpen"
+                        class="inline-flex items-center gap-2 rounded-xl border border-[#95B5D3]/55 bg-white/95 px-3 py-2 text-sm font-medium text-dark-slate transition hover:border-white hover:text-navy-primary">
+                        <span class="inline-grid h-7 w-7 place-items-center rounded-lg"
+                            :class="isAlpha() ? 'bg-amber-100 text-amber-700' : 'bg-[#E7EFF6] text-[#0B4A85]'"
+                            x-text="isAlpha() ? 'α' : (currentUser?.name || 'U').slice(0, 1).toUpperCase()"></span>
+                        <span x-text="currentUser?.name"></span>
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div x-show="profileOpen" x-transition
+                        class="absolute right-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                        <a x-show="!isAlpha()" href="/profile" @click.prevent="profileOpen = false; navigate('/profile')"
+                            class="block w-full px-4 py-2 text-start text-sm text-gray-700 hover:bg-gray-100">
+                            Profile
+                        </a>
+                        <button type="button" @click="profileOpen = false; logout()"
+                            class="block w-full px-4 py-2 text-start text-sm text-gray-700 hover:bg-gray-100">
+                            Log Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" @click="mobileNavOpen = !mobileNavOpen"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#95B5D3]/55 bg-white/95 text-dark-slate/80 md:hidden">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        :d="mobileNavOpen ? 'M6 6l12 12M6 18L18 6' : 'M4 6h16M4 12h16M4 18h16'" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Slide-down Menu -->
+        <div x-cloak x-show="mobileNavOpen" class="border-t border-slate-200 bg-white p-4 md:hidden">
+            <div class="space-y-1">
+                <template x-for="item in activeSidebarItems()" :key="item.path">
+                    <a :href="item.path" @click.prevent="mobileNavOpen = false; navigate(item.path)"
+                        class="block rounded-xl px-3 py-2 text-sm font-medium transition"
+                        :class="isNavActive(item) ? 'bg-navy-primary text-white' : 'text-dark-slate/80 hover:bg-navy-light hover:text-navy-primary'"
+                        x-text="item.label"></a>
+                </template>
+            </div>
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-3">
+                <p class="text-sm font-semibold text-navy-primary" x-text="currentUser?.name"></p>
+                <p class="text-xs text-dark-slate/70" x-text="currentUser?.email"></p>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <a x-show="!isAlpha()" href="/profile" @click.prevent="mobileNavOpen = false; navigate('/profile')"
+                        class="rounded-lg border border-navy-primary/30 px-3 py-1.5 text-xs font-medium text-navy-primary">Profile</a>
+                    <button type="button" @click="mobileNavOpen = false; logout()"
+                        class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-600">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Grid with Sidebar -->
+    <div class="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-6 px-4 pb-8 pt-6 sm:px-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:px-8">
+        <aside class="hidden lg:block">
+            <div class="card-soft sticky top-24 rounded-3xl p-4">
+                <p class="px-3 text-xs font-semibold uppercase tracking-[0.18em] text-navy-primary/70"
+                    x-text="isAlpha() ? 'Alpha Panel' : 'Workspace'"></p>
+
+                <nav class="mt-3 space-y-1.5">
+                    <template x-for="item in primarySidebarItems()" :key="item.path">
+                        <a :href="item.path" @click.prevent="navigate(item.path)"
+                            class="sidebar-link" :class="isNavActive(item) ? 'sidebar-link-active' : ''">
+                            <span x-text="item.label"></span>
+                            <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </template>
+                </nav>
+
+                <template x-if="bottomSidebarItems().length > 0">
+                    <div class="mt-5 space-y-1.5 border-t border-slate-200 pt-4">
+                        <template x-for="item in bottomSidebarItems()" :key="item.path">
+                            <a :href="item.path" @click.prevent="navigate(item.path)"
+                                class="sidebar-link" :class="isNavActive(item) ? 'sidebar-link-active' : ''">
+                                <span x-text="item.label"></span>
+                                <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </aside>
+
+        <section class="space-y-6">
+            <!-- Dynamic Page Header -->
+            <header class="card-soft rounded-3xl p-5 sm:p-6">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-navy-primary/70" x-text="pageHeader().eyebrow"></p>
+                        <h2 class="mt-1 font-display text-2xl font-semibold text-navy-primary sm:text-3xl" x-text="pageHeader().title"></h2>
+                        <template x-if="pageHeader().subtitle">
+                            <p class="mt-1 text-sm text-gray-600" x-text="pageHeader().subtitle"></p>
+                        </template>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <template x-if="route.name === 'attendanceHistory'">
+                            <a href="/dashboard" @click.prevent="navigate('/dashboard')"
+                                class="inline-flex items-center gap-2 rounded-xl border border-navy-primary/30 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-navy-primary hover:bg-navy-primary/5">
+                                &larr; Back to Dashboard
+                            </a>
+                        </template>
+                        <template x-if="route.name === 'postsIndex' && isAdmin()">
+                            <a href="/posts/create" @click.prevent="navigate('/posts/create')"
+                                class="inline-flex items-center rounded-md bg-[#0B4A85] border border-[#0B4A85] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-[#063157]">
+                                + Tambah Post
+                            </a>
+                        </template>
+                        <template x-if="isAlpha()">
+                            <span class="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                                Developer Testing Environment
+                            </span>
+                        </template>
+                        <p x-show="!isAlpha() && route.name !== 'postsIndex'" class="text-sm font-medium text-slate-500" x-text="todayHeaderLabel()"></p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Status / Error Banners -->
+            <template x-if="flashStatus">
+                <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 flex items-center justify-between gap-3">
+                    <span x-text="flashStatus"></span>
+                    <button type="button" @click="flashStatus = ''" class="text-emerald-700/70 hover:text-emerald-900 font-bold">&times;</button>
+                </div>
+            </template>
+
+            <template x-if="flashError">
+                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 flex items-center justify-between gap-3">
+                    <span x-text="flashError"></span>
+                    <button type="button" @click="flashError = ''" class="text-rose-700/70 hover:text-rose-900 font-bold">&times;</button>
+                </div>
+            </template>
+
+            <!-- Workspace / Alpha Page Content -->
+            <main class="space-y-6">
+                <!-- WORKSPACE_PAGES -->
+            </main>
+
+            <footer class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-dark-slate/75 sm:text-sm">
+                <p x-text="'© ' + new Date().getFullYear() + ' ' + brandName() + '. ' + (isAlpha() ? 'Alpha developer panel — for testing purposes only.' : 'Built for responsive employee workflows.')"></p>
+            </footer>
+        </section>
+    </div>
+
+    <!-- Shared Admin Leave Review Modal -->
+    <div x-cloak x-show="leaveReviewModal.open && leaveReviewModal.leave"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        role="dialog" aria-modal="true" @click.self="closeLeaveReview()">
+        <div class="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-white shadow-xl overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3 shrink-0">
+                <div>
+                    <h3 class="font-display text-lg font-semibold text-slate-900">Review Leave Request</h3>
+                    <p class="text-sm text-slate-500" x-text="leaveReviewModal.leave ? userNameById(leaveReviewModal.leave.user_id) : ''"></p>
+                </div>
+                <button type="button" @click="closeLeaveReview()" class="rounded-md p-2 text-slate-500 hover:bg-slate-100">&times;</button>
+            </div>
+
+            <div class="space-y-4 px-5 py-4 overflow-y-auto flex-1" x-show="leaveReviewModal.leave">
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Type</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-800" x-text="leaveReviewModal.leave?.jenis_izin"></p>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-800"
+                            x-text="leaveReviewModal.leave ? formatDate(leaveReviewModal.leave.tanggal_mulai) + ' - ' + formatDate(leaveReviewModal.leave.tanggal_selesai) : ''"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-sm font-semibold text-slate-700">Reason</p>
+                    <p class="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 whitespace-pre-wrap"
+                        x-text="leaveReviewModal.leave?.alasan"></p>
+                </div>
+
+                <div>
+                    <p class="text-sm font-semibold text-slate-700">Medical Certificate / Attachment</p>
+                    <div class="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <template x-if="leaveReviewModal.leave?.bukti_file?.previewUrl && String(leaveReviewModal.leave?.bukti_file?.type).startsWith('image/')">
+                            <img :src="leaveReviewModal.leave.bukti_file.previewUrl" alt="Medical certificate"
+                                class="w-full max-h-64 rounded-md border border-slate-200 object-contain bg-white" />
+                        </template>
+                        <template x-if="leaveReviewModal.leave?.bukti_file && (!leaveReviewModal.leave?.bukti_file?.previewUrl || !String(leaveReviewModal.leave?.bukti_file?.type).startsWith('image/'))">
+                            <p class="text-sm font-medium text-[#0B4A85]" x-text="leaveReviewModal.leave.bukti_file.name"></p>
+                        </template>
+                        <template x-if="!leaveReviewModal.leave?.bukti_file">
+                            <p class="text-sm text-slate-500">No attachment uploaded for this request.</p>
+                        </template>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="review_admin_note" class="mb-1 block text-sm font-medium text-slate-700">Admin Notes (optional)</label>
+                    <textarea id="review_admin_note" x-model="leaveReviewModal.note" rows="3"
+                        placeholder="Add optional notes (for example: reason for rejection)..."
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0B4A85]"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 px-5 py-3 shrink-0">
+                <button type="button" @click="approveLeave(leaveReviewModal.leave.id)"
+                    class="rounded-md bg-[#11A582] px-4 py-2 font-semibold text-white transition hover:bg-teal-700">
+                    Approve
+                </button>
+                <button type="button" @click="rejectLeave(leaveReviewModal.leave.id, leaveReviewModal.note)"
+                    class="rounded-md border border-[#FF6B6B] px-4 py-2 font-semibold text-[#FF6B6B] transition hover:bg-red-50">
+                    Reject
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

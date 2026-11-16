@@ -1,0 +1,181 @@
+<!-- ALPHA SETTINGS -->
+<template x-if="route.name === 'alphaSettings' && currentUser && isAlpha()">
+    <div class="space-y-6" x-data="{ showConfirm: false }">
+        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 border border-[#0B4A85]/15">
+            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Company Settings</h3>
+            <p class="mt-1 text-sm text-slate-500">Customize allowed company email domain and office attendance timing.</p>
+
+            <form @submit.prevent="saveAlphaSettings()" class="mt-6 space-y-5">
+                <div>
+                    <label for="alpha_domain" class="mb-1.5 block text-sm font-medium text-slate-600">Company Email Domain</label>
+                    <input id="alpha_domain" type="text" x-model="settingsForm.company_email_domain" placeholder="tiptap.id"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="alpha_in" class="mb-1.5 block text-sm font-medium text-slate-600">Standard Clock-In Time</label>
+                        <input id="alpha_in" type="time" x-model="settingsForm.jam_masuk_kantor"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                    </div>
+                    <div>
+                        <label for="alpha_out" class="mb-1.5 block text-sm font-medium text-slate-600">Standard Clock-Out Time</label>
+                        <input id="alpha_out" type="time" x-model="settingsForm.jam_mulai_pulang"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-[#0B4A85] text-white w-full sm:w-auto px-6 py-2 rounded-lg font-semibold transition hover:bg-blue-900">
+                    Save Configuration
+                </button>
+            </form>
+        </section>
+
+        <section class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8 border border-rose-200">
+            <div class="flex items-start gap-4">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-100 text-rose-600">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-semibold text-rose-700">Reset Today's Attendance</h3>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Delete all attendance records for <strong x-text="formatDate(todayDate())"></strong> so every user can clock in again.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button type="button" @click="showConfirm = true"
+                    class="inline-flex items-center gap-2 rounded-lg border-2 border-rose-500 bg-rose-500 px-6 py-3 font-semibold text-white transition hover:bg-rose-600">
+                    Reset Attendance
+                </button>
+            </div>
+
+            <div x-cloak x-show="showConfirm" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#031936]/60 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-md overflow-hidden rounded-3xl border border-rose-300/40 bg-white shadow-2xl" @click.away="showConfirm = false">
+                    <div class="bg-gradient-to-r from-rose-600 to-rose-500 px-6 py-4 text-white">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Destructive Action</p>
+                        <h4 class="mt-1 font-display text-xl font-semibold">Reset Today's Attendance?</h4>
+                    </div>
+                    <div class="space-y-5 px-6 py-5">
+                        <p class="text-sm leading-6 text-slate-600">
+                            This will permanently delete all attendance records for today. Every user will be able to clock in again as if it's a new day.
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" @click="showConfirm = false"
+                                class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                            <button type="button" @click="alphaResetToday(); showConfirm = false"
+                                class="rounded-xl border border-rose-500 bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-600">Yes, Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</template>
+
+<!-- ALPHA DEVTOOLS -->
+<template x-if="route.name === 'alphaDevtools' && currentUser && isAlpha()">
+    <div class="space-y-6" x-data="{ showResetConfirm: false }">
+        <section class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-6 border border-[#0B4A85]/15">
+            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Generate Tester Data</h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Creates 20 tester accounts and generates attendance records going back N days from today.
+            </p>
+
+            <form @submit.prevent="alphaGenerateTesters()" class="mt-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div class="flex-1 max-w-xs">
+                        <label for="alpha_days" class="mb-1.5 block text-sm font-medium text-slate-600">Number of Days</label>
+                        <input id="alpha_days" type="number" min="1" max="365" x-model.number="alphaDaysInput"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                    </div>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#0B4A85] px-6 py-3 font-semibold text-white transition hover:bg-[#063157]">
+                        Generate Data
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="max-w-4xl mx-auto rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <header class="bg-[#0B4A85] text-white">
+                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="font-display text-lg font-semibold">Tester Accounts</h3>
+                        <p class="text-sm text-white/85">20 accounts across 5 behavior groups</p>
+                    </div>
+                    <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">Password: tester123</span>
+                </div>
+            </header>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Behavior</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Days</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <template x-for="(acc, idx) in alphaTesterSnapshot().accounts" :key="acc.email">
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-4 py-3 font-semibold text-slate-400" x-text="idx + 1"></td>
+                                <td class="px-4 py-3 font-medium text-slate-800" x-text="acc.name"></td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-md bg-[#0B4A85]/10 px-2 py-0.5 text-xs font-semibold text-[#0B4A85]" x-text="acc.email"></span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold" :class="acc.meta.color" x-text="acc.meta.label"></span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold" :class="acc.exists ? 'text-emerald-600' : 'text-slate-400'">
+                                        <span class="h-2 w-2 rounded-full" :class="acc.exists ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+                                        <span x-text="acc.exists ? 'Active' : 'Not Created'"></span>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600" x-text="acc.attendance_days"></span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-6 border border-rose-200">
+            <h3 class="font-display text-xl font-semibold text-rose-700">Reset All Testers</h3>
+            <p class="mt-1 text-sm text-slate-500">Delete all 20 tester accounts and their attendance records.</p>
+            <div class="mt-5">
+                <button type="button" @click="showResetConfirm = true"
+                    class="inline-flex items-center gap-2 rounded-lg border-2 border-rose-500 bg-rose-500 px-6 py-3 font-semibold text-white transition hover:bg-rose-600">
+                    Delete All Testers
+                </button>
+            </div>
+
+            <div x-cloak x-show="showResetConfirm" class="fixed inset-0 z-[70] flex items-center justify-center bg-[#031936]/60 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-md overflow-hidden rounded-3xl border border-rose-300/40 bg-white shadow-2xl" @click.away="showResetConfirm = false">
+                    <div class="bg-gradient-to-r from-rose-600 to-rose-500 px-6 py-4 text-white">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Destructive Action</p>
+                        <h4 class="mt-1 font-display text-xl font-semibold">Delete All Tester Data?</h4>
+                    </div>
+                    <div class="space-y-5 px-6 py-5">
+                        <p class="text-sm leading-6 text-slate-600">This will permanently delete all 20 tester accounts and their attendance records.</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" @click="showResetConfirm = false"
+                                class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                            <button type="button" @click="alphaResetTesters(); showResetConfirm = false"
+                                class="rounded-xl border border-rose-500 bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-600">Yes, Delete All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</template>

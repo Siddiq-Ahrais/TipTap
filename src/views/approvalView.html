@@ -1,0 +1,406 @@
+<!-- APPROVAL CENTER INDEX -->
+<template x-if="route.name === 'approvalIndex' && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <!-- Today's Attendance Table -->
+        <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <header class="bg-[#0B4A85] text-white">
+                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="font-display text-lg font-semibold">Today's Attendance</h3>
+                        <p class="text-sm text-white/85"
+                            x-text="adminStats().todayAttendances.length + '/' + adminStats().totalEmployeeCount + ' employees clocked in · ranked by earliest clock-in time'"></p>
+                    </div>
+                    <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white"
+                        x-text="adminStats().todayAttendances.length + (adminStats().todayAttendances.length === 1 ? ' record' : ' records')"></span>
+                </div>
+            </header>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="w-16 px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.14em]">No</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Employee ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Clock In</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Clock Out</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em]">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <template x-for="(att, idx) in approvalTodayPage().items" :key="att.id">
+                            <tr class="hover:bg-slate-50/80 transition-colors" :class="(approvalTodayPage().startIndex + idx) === 0 ? 'bg-emerald-50/40' : ''">
+                                <td class="w-16 px-4 py-3 text-center font-semibold text-slate-500">
+                                    <template x-if="(approvalTodayPage().startIndex + idx) === 0">
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-sm" title="Fastest clock-in">🥇</span>
+                                    </template>
+                                    <template x-if="(approvalTodayPage().startIndex + idx) === 1">
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-sm" title="2nd fastest">🥈</span>
+                                    </template>
+                                    <template x-if="(approvalTodayPage().startIndex + idx) === 2">
+                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-sm" title="3rd fastest">🥉</span>
+                                    </template>
+                                    <template x-if="(approvalTodayPage().startIndex + idx) > 2">
+                                        <span class="inline-flex h-7 w-7 items-center justify-center text-sm font-bold" x-text="approvalTodayPage().startIndex + idx + 1"></span>
+                                    </template>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-md bg-[#0B4A85]/10 px-2 py-0.5 text-xs font-semibold text-[#0B4A85]"
+                                        x-text="formatEmployeeCode(att.user_id)"></span>
+                                </td>
+                                <td class="px-4 py-3 font-medium text-slate-800" x-text="userNameById(att.user_id)"></td>
+                                <td class="px-4 py-3 text-slate-600 font-mono text-xs" x-text="att.waktu_masuk || '-'"></td>
+                                <td class="px-4 py-3 text-slate-600 font-mono text-xs" x-text="att.waktu_keluar || '—'"></td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                                        :class="adminAttendanceBadge(att).classes" x-text="adminAttendanceBadge(att).label"></span>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="approvalTodayPage().items.length === 0">
+                            <tr>
+                                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                                    No employees have clocked in yet today.
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <template x-if="approvalTodayPage().totalPages > 1">
+                <div class="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50/60">
+                    <p class="text-xs text-slate-500">
+                        Showing <span class="font-semibold text-slate-700" x-text="(approvalTodayPage().startIndex + 1) + '–' + approvalTodayPage().endIndex"></span>
+                        of <span class="font-semibold text-slate-700" x-text="approvalTodayPage().total"></span>
+                    </p>
+                    <div class="flex items-center gap-1">
+                        <button type="button" :disabled="approvalTodayPagination.page <= 1" @click="approvalTodayPagination.page--"
+                            class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 disabled:opacity-40 hover:bg-[#0B4A85] hover:text-white">Prev</button>
+                        <template x-for="p in approvalTodayPage().totalPages" :key="p">
+                            <button type="button" @click="approvalTodayPagination.page = p"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold"
+                                :class="approvalTodayPagination.page === p ? 'bg-[#0B4A85] text-white' : 'border border-slate-200 bg-white text-slate-600'"
+                                x-text="p"></button>
+                        </template>
+                        <button type="button" :disabled="approvalTodayPagination.page >= approvalTodayPage().totalPages" @click="approvalTodayPagination.page++"
+                            class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 disabled:opacity-40 hover:bg-[#0B4A85] hover:text-white">Next</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Excel Export Downloads -->
+            <div class="flex flex-col gap-3 px-5 py-4 border-t border-slate-200 bg-slate-50/40 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-700">Download Attendance Report</p>
+                    <p class="text-xs text-slate-500">Export records as Excel file (.xls)</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" @click="exportExcel('today')"
+                        class="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                        Today
+                    </button>
+                    <button type="button" @click="exportExcel('weekly')"
+                        class="inline-flex items-center gap-2 rounded-lg border border-[#0B4A85]/30 bg-[#0B4A85]/5 px-4 py-2 text-xs font-semibold text-[#0B4A85] transition hover:bg-[#0B4A85]/10">
+                        This Week
+                    </button>
+                    <button type="button" @click="exportExcel('monthly')"
+                        class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100">
+                        This Month
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 Approval Category Cards -->
+        <section class="grid gap-5 lg:grid-cols-3">
+            <a href="/approval/registrations" @click.prevent="navigate('/approval/registrations')"
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#0B4A85]/60 hover:shadow-lg">
+                <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B4A85]/10 transition group-hover:bg-[#0B4A85]/20"></div>
+                <div class="relative">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B4A85]">Approval Category</p>
+                    <h3 class="mt-2 font-display text-2xl font-bold text-slate-900">Pending Registrations</h3>
+                    <p class="mt-2 text-sm text-slate-600">Review new account registrations and approve official employees.</p>
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]"
+                            x-text="adminStats().pendingUsers.length + ' Pending'"></span>
+                        <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B4A85]">Open Menu &rarr;</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/approval/early-checkouts" @click.prevent="navigate('/approval/early-checkouts')"
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#0B4A85]/60 hover:shadow-lg">
+                <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B4A85]/10 transition group-hover:bg-[#0B4A85]/20"></div>
+                <div class="relative">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B4A85]">Approval Category</p>
+                    <h3 class="mt-2 font-display text-2xl font-bold text-slate-900">Early Checkout Approval</h3>
+                    <p class="mt-2 text-sm text-slate-600">Handle employee requests to clock out before office checkout time.</p>
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]"
+                            x-text="adminStats().pendingEarlyCheckouts.length + ' Pending'"></span>
+                        <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B4A85]">Open Menu &rarr;</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/approval/leaves" @click.prevent="navigate('/approval/leaves')"
+                class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#0B4A85]/60 hover:shadow-lg">
+                <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#0B4A85]/10 transition group-hover:bg-[#0B4A85]/20"></div>
+                <div class="relative">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B4A85]">Approval Category</p>
+                    <h3 class="mt-2 font-display text-2xl font-bold text-slate-900">Leave Approval</h3>
+                    <p class="mt-2 text-sm text-slate-600">Review employee leave and sick forms, then approve or reject each request.</p>
+                    <div class="mt-5 flex items-center justify-between">
+                        <span class="rounded-full bg-[#0B4A85]/10 px-3 py-1 text-xs font-semibold text-[#0B4A85]"
+                            x-text="adminStats().pendingLeaves.length + ' Pending'"></span>
+                        <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B4A85]">Open Menu &rarr;</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+    </div>
+</template>
+
+<!-- APPROVAL REGISTRATIONS -->
+<template x-if="route.name === 'approvalRegistrations' && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <input type="text" x-model="registrationSearch" placeholder="Search employee name or email..."
+                    class="w-full lg:max-w-sm rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-slate-700 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20" />
+                <a href="/approval" @click.prevent="navigate('/approval')"
+                    class="inline-flex items-center gap-2 rounded-lg border border-[#0B4A85]/30 bg-white px-4 py-2 text-sm font-semibold text-[#0B4A85] hover:bg-[#0B4A85]/5">
+                    &larr; Back to Approval Menu
+                </a>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <header class="bg-[#0B4A85] text-white">
+                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 class="font-display text-lg font-semibold">Pending Registrations</h3>
+                    <p class="text-sm text-white/85">Approve official employees before they can log in</p>
+                </div>
+            </header>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                        <tr>
+                            <th class="p-4 text-left font-semibold">Name</th>
+                            <th class="p-4 text-left font-semibold">Email</th>
+                            <th class="p-4 text-left font-semibold">Registered</th>
+                            <th class="p-4 text-left font-semibold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="u in filteredPendingRegistrations()" :key="u.id">
+                            <tr class="border-b border-gray-200 hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-800" x-text="u.name"></td>
+                                <td class="p-4 text-slate-600" x-text="u.email"></td>
+                                <td class="p-4 text-slate-600" x-text="formatDateTime(u.created_at)"></td>
+                                <td class="p-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" @click="approveUser(u.id)"
+                                            class="inline-flex items-center gap-2 rounded-md bg-[#0B4A85] px-4 py-2 font-medium text-white transition hover:bg-[#063157]">
+                                            Approve
+                                        </button>
+                                        <button type="button" @click="rejectUser(u.id)"
+                                            class="inline-flex items-center gap-2 rounded-md border border-rose-300 px-4 py-2 font-medium text-rose-700 transition hover:bg-rose-50">
+                                            Reject
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="filteredPendingRegistrations().length === 0">
+                            <tr>
+                                <td colspan="4" class="p-6 text-center text-slate-500">No pending registrations right now.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</template>
+
+<!-- APPROVAL EARLY CHECKOUTS -->
+<template x-if="route.name === 'approvalEarlyCheckouts' && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <header class="bg-[#0B4A85] text-white">
+                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 class="font-display text-lg font-semibold">Pending Early Checkout Requests</h3>
+                    <p class="text-sm text-white/85">Approve or reject requests before official office checkout time</p>
+                </div>
+            </header>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                        <tr>
+                            <th class="p-4 text-left font-semibold">Employee</th>
+                            <th class="p-4 text-left font-semibold">Email</th>
+                            <th class="p-4 text-left font-semibold">Date</th>
+                            <th class="p-4 text-left font-semibold">Clock In</th>
+                            <th class="p-4 text-left font-semibold">Requested At</th>
+                            <th class="p-4 text-left font-semibold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="att in adminStats().pendingEarlyCheckouts" :key="att.id">
+                            <tr class="border-b border-gray-200 hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-800" x-text="userNameById(att.user_id)"></td>
+                                <td class="p-4 text-slate-600" x-text="userEmailById(att.user_id)"></td>
+                                <td class="p-4 text-slate-600" x-text="formatDate(att.tanggal)"></td>
+                                <td class="p-4 text-slate-600" x-text="String(att.waktu_masuk || '').slice(0, 5)"></td>
+                                <td class="p-4 text-slate-600" x-text="formatDateTime(att.early_checkout_requested_at)"></td>
+                                <td class="p-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" @click="approveEarlyCheckout(att.id)"
+                                            class="inline-flex items-center gap-2 rounded-md bg-[#0B4A85] px-4 py-2 font-medium text-white transition hover:bg-[#063157]">
+                                            Approve
+                                        </button>
+                                        <button type="button" @click="rejectEarlyCheckout(att.id)"
+                                            class="inline-flex items-center gap-2 rounded-md border border-rose-300 px-4 py-2 font-medium text-rose-700 transition hover:bg-rose-50">
+                                            Reject
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="adminStats().pendingEarlyCheckouts.length === 0">
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-slate-500">No early checkout requests pending right now.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</template>
+
+<!-- APPROVAL LEAVES -->
+<template x-if="route.name === 'approvalLeaves' && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <section class="rounded-2xl border border-[#0B4A85]/20 bg-white p-5 shadow-sm">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B4A85]">Today's Attendance Stat</p>
+                    <h3 class="mt-1 font-display text-2xl font-bold text-slate-900"
+                        x-text="adminStats().clockedInTodayCount + '/' + adminStats().totalEmployeeCount"></h3>
+                </div>
+                <p class="text-sm text-slate-600">Employees clocked in today out of total registered employees.</p>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <header class="bg-[#0B4A85] text-white">
+                <div class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 class="font-display text-lg font-semibold">Pending Leave & Sick Requests</h3>
+                    <p class="text-sm text-white/85">Review employee requests and process approval decisions</p>
+                </div>
+            </header>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                        <tr>
+                            <th class="p-4 text-left font-semibold">Employee Name</th>
+                            <th class="p-4 text-left font-semibold">Date</th>
+                            <th class="p-4 text-left font-semibold">Type</th>
+                            <th class="p-4 text-left font-semibold">Reason</th>
+                            <th class="p-4 text-left font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="leave in adminStats().pendingLeaves" :key="leave.id">
+                            <tr class="border-b border-gray-200 align-top hover:bg-slate-50">
+                                <td class="p-4">
+                                    <p class="font-medium text-slate-800" x-text="userNameById(leave.user_id)"></p>
+                                    <p class="text-xs text-slate-500" x-text="userEmailById(leave.user_id)"></p>
+                                </td>
+                                <td class="p-4 text-slate-700" x-text="formatDate(leave.tanggal_mulai) + ' - ' + formatDate(leave.tanggal_selesai)"></td>
+                                <td class="p-4 text-slate-700" x-text="leave.jenis_izin"></td>
+                                <td class="p-4 text-slate-700 max-w-sm">
+                                    <p class="line-clamp-3 whitespace-pre-wrap" x-text="leave.alasan"></p>
+                                </td>
+                                <td class="p-4">
+                                    <button type="button" @click="openLeaveReview(leave)"
+                                        class="inline-flex items-center rounded-md border border-[#0B4A85]/30 px-3 py-2 text-xs font-semibold text-[#0B4A85] transition hover:bg-[#0B4A85]/5">
+                                        Review
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="adminStats().pendingLeaves.length === 0">
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-slate-500">No pending leave or sick forms right now.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</template>
+
+<!-- SYSTEM CONFIG SETTINGS -->
+<template x-if="route.name === 'approvalSettings' && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <section class="bg-white rounded-xl shadow-sm p-8 border border-[#0B4A85]/15">
+            <h3 class="font-display text-xl font-semibold text-[#0B4A85]">Company Settings</h3>
+            <p class="mt-1 text-sm text-slate-500">Customize allowed company email domain, office hours, and working days.</p>
+
+            <form @submit.prevent="saveSettingsForm()" class="mt-6 space-y-5">
+                <div>
+                    <label for="cfg_domain" class="mb-1.5 block text-sm font-medium text-slate-600">Company Email Domain</label>
+                    <input id="cfg_domain" type="text" x-model="settingsForm.company_email_domain" placeholder="tiptap.id"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <div class="space-y-4">
+                        <p class="text-sm font-semibold text-slate-700">Work Time</p>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="cfg_in" class="mb-1.5 block text-sm font-medium text-slate-600">Standard Clock-In Time</label>
+                                <input id="cfg_in" type="time" x-model="settingsForm.jam_masuk_kantor"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                            </div>
+                            <div>
+                                <label for="cfg_out" class="mb-1.5 block text-sm font-medium text-slate-600">Standard Clock-Out Time</label>
+                                <input id="cfg_out" type="time" x-model="settingsForm.jam_mulai_pulang"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-[#0B4A85] focus:border-[#0B4A85]" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <p class="text-sm font-semibold text-slate-700">Work Days</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="day in workDayOptions" :key="day.num">
+                                <label class="flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition"
+                                    :class="settingsForm.work_days.includes(day.num) ? 'border-[#0B4A85] bg-[#0B4A85]/5' : 'border-gray-200 bg-white hover:bg-slate-50'">
+                                    <input type="checkbox" :checked="settingsForm.work_days.includes(day.num)"
+                                        @change="toggleWorkDay(day.num)"
+                                        class="h-4 w-4 rounded border-gray-300 text-[#0B4A85] focus:ring-[#0B4A85]" />
+                                    <span class="text-sm font-medium"
+                                        :class="settingsForm.work_days.includes(day.num) ? 'text-[#0B4A85]' : 'text-slate-600'"
+                                        x-text="day.name"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-[#0B4A85] text-white w-full sm:w-auto px-6 py-2 rounded-lg font-semibold transition hover:bg-blue-900">
+                    Save Configuration
+                </button>
+            </form>
+        </section>
+    </div>
+</template>

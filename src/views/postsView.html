@@ -1,0 +1,114 @@
+<!-- POSTS INDEX -->
+<template x-if="route.name === 'postsIndex' && currentUser">
+    <div class="space-y-6" x-data="{ showDeleteModal: false, deleteTargetId: null, deletePostTitle: '' }">
+        <div class="space-y-4">
+            <template x-for="post in sortedPosts()" :key="post.id">
+                <div class="bg-white shadow rounded-xl p-5 border border-[#0B4A85]/15">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <a :href="'/posts/' + post.id" @click.prevent="navigate('/posts/' + post.id)"
+                                class="text-lg font-semibold text-gray-900 hover:text-[#0B4A85]" x-text="post.judul"></a>
+                            <p class="mt-2 text-sm leading-6 text-gray-600" x-text="post.deskripsi"></p>
+                        </div>
+
+                        <template x-if="isAdmin()">
+                            <div class="flex items-center gap-2 shrink-0">
+                                <a :href="'/posts/' + post.id + '/edit'" @click.prevent="navigate('/posts/' + post.id + '/edit')"
+                                    class="inline-flex items-center rounded-md border border-yellow-500 px-3 py-2 text-xs font-semibold text-yellow-600 hover:bg-yellow-50 transition">
+                                    Edit
+                                </a>
+                                <button type="button"
+                                    @click="deleteTargetId = post.id; deletePostTitle = post.judul; showDeleteModal = true"
+                                    class="inline-flex items-center rounded-md border border-red-500 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
+                                    Hapus
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="sortedPosts().length === 0">
+                <div class="bg-white shadow rounded-xl border border-dashed border-[#0B4A85]/30 p-10 text-center">
+                    <p class="text-sm text-gray-600">Belum ada data post.</p>
+                </div>
+            </template>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div x-cloak x-show="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
+            <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="bg-[#0B4A85] px-6 py-4">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Delete Confirmation</p>
+                    <h3 class="mt-1 text-lg font-bold text-white">Are you sure you want to delete?</h3>
+                </div>
+                <div class="px-6 py-5">
+                    <p class="text-sm text-slate-600">
+                        This action will permanently delete the post
+                        <span class="font-semibold text-slate-800" x-text="deletePostTitle"></span>.
+                        This cannot be undone.
+                    </p>
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                        <button type="button" @click="showDeleteModal = false"
+                            class="inline-flex items-center justify-center rounded-lg border border-[#0B4A85] bg-white px-5 py-2.5 text-sm font-semibold text-[#0B4A85] hover:bg-[#E7EFF6] min-w-[100px]">
+                            No
+                        </button>
+                        <button type="button" @click="deletePost(deleteTargetId); showDeleteModal = false"
+                            class="inline-flex items-center justify-center rounded-lg bg-[#0B4A85] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#063157] min-w-[100px]">
+                            Yes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- POST SHOW -->
+<template x-if="route.name === 'postsShow' && currentUser">
+    <div class="space-y-6">
+        <template x-if="currentPost()">
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2" x-text="currentPost().judul"></h2>
+                <p class="text-sm leading-6 text-gray-600 whitespace-pre-wrap" x-text="currentPost().deskripsi"></p>
+            </div>
+        </template>
+        <a href="/posts" @click.prevent="navigate('/posts')"
+            class="inline-flex items-center gap-2 rounded-lg border border-[#0B4A85]/30 bg-white px-4 py-2 text-sm font-semibold text-[#0B4A85] transition hover:bg-[#0B4A85]/5">
+            &larr; Back to Announcements
+        </a>
+    </div>
+</template>
+
+<!-- POST CREATE OR EDIT -->
+<template x-if="(route.name === 'postsCreate' || route.name === 'postsEdit') && currentUser && isAdmin()">
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <form @submit.prevent="submitPostForm()" class="space-y-5">
+                <div>
+                    <label for="post_judul" class="mb-2 block text-sm font-medium text-gray-700">Judul Post</label>
+                    <input id="post_judul" type="text" x-model="postForm.judul" required placeholder="Masukkan judul post"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20" />
+                </div>
+
+                <div>
+                    <label for="post_deskripsi" class="mb-2 block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <textarea id="post_deskripsi" x-model="postForm.deskripsi" rows="6" required placeholder="Masukkan isi post"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-[#0B4A85] focus:outline-none focus:ring-2 focus:ring-[#0B4A85]/20"></textarea>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit"
+                        class="inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition"
+                        :class="route.name === 'postsEdit' ? 'bg-green-600 hover:bg-green-700' : 'bg-[#0B4A85] hover:bg-[#063157]'"
+                        x-text="route.name === 'postsEdit' ? 'Update' : 'Simpan'"></button>
+                    <a href="/posts" @click.prevent="navigate('/posts')"
+                        class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
